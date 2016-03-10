@@ -56,4 +56,33 @@ describe Geo::Coord do
       c.lngdms(true).should == [-c.lngd, c.lngm, c.lngs]
     end
   end
+
+  context 'simple conversions' do
+    it 'is inspectable' do
+      c = Geo::Coord.new(50.004444, 36.231389)
+      c.inspect.should == '#<Geo::Coord 50.004444,36.231389>'
+    end
+    
+    it 'is convertible to string' do
+      c = Geo::Coord.new(50.004444, 36.231389)
+      c.to_s.should == '50.004444,36.231389'
+
+      c = Geo::Coord.new(-50.004444, -36.231389)
+      c.to_s.should == '-50.004444,-36.231389'
+    end
+
+    it 'is convertible to array' do
+      c = Geo::Coord.new(50.004444, 36.231389)
+      c.to_a.should == [50.004444, 36.231389]
+    end
+
+    it 'is convertible to hash' do
+      c = Geo::Coord.new(50.004444, 36.231389)
+      c.to_h.should == {lat: 50.004444, lng: 36.231389}
+      c.to_h(lat: :latitude, lng: :longitude).should ==
+        {latitude: 50.004444, longitude: 36.231389}
+        
+      c.to_h(lng: :lon).should == {lat: 50.004444, lon: 36.231389}
+    end
+  end
 end

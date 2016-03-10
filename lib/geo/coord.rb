@@ -59,6 +59,22 @@ module Geo
       nohemisphere ? [lngsign * lngd, lngm, lngs] : [lngd, lngm, lngs, lngh]
     end
 
+    def inspect
+      '#<%s %s>' % [self.class.name, to_s]
+    end
+
+    def to_s
+      '%f,%f' % [lat, lng]
+    end
+
+    def to_a
+      [lat, lng]
+    end
+
+    def to_h(lat: :lat, lng: :lng)
+      {lat.to_sym => self.lat, lng.to_sym => self.lng}
+    end
+
     private
 
     def latsign
