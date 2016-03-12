@@ -5,6 +5,21 @@ module Geo
     alias :latitude :lat
     alias :longitude :lng
     alias :lon :lng
+
+    LAT_KEYS = %i[lat latitude]
+    LNG_KEYS = %i[lng lon longitude]
+
+    class << self
+      def from_h(hash)
+        h = hash.map{|k, v| [k.to_s.downcase.to_sym, v]}.to_h
+        lat = h.values_at(*LAT_KEYS).compact.first or
+          raise(ArgumentError, "No latitude value found in #{hash}")
+        lng = h.values_at(*LNG_KEYS).compact.first or
+          raise(ArgumentError, "No longitude value found in #{hash}")
+
+        new(lat, lng)
+      end
+    end
     
     def initialize(lat, lng)
       unless (-90..90).cover?(lat)
@@ -17,6 +32,10 @@ module Geo
       
       @lat = lat
       @lng = lng
+    end
+
+    def ==(other)
+      other.is_a?(self.class) && other.lat == lat && other.lng == lng
     end
 
     def latd

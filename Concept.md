@@ -112,10 +112,10 @@ Class methods:
   are "N"/"S" for latitude and "W"/E" for longitude; any component except
   for degrees can be omitted; if hemisphere is omitted, it is decided by
   degrees sign (lat: positive is "N", lng: positive is "E");
-* `strpcoord` parses string into coordinates by provided pattern (see
-  below for pattern description);
 * `from_h(hash)` creates instance from hash with `"lat"` or `"latitude"`
   key and `"lon"` or `"lng"` or `"longitude"` key (case-independent);
+* `strpcoord` parses string into coordinates by provided pattern (see
+  below for pattern description);
 * `parse_ll` parses coordinates string in `"float, float"` form;
 * `parse_dms` parses coordinates string in `d m s h, d m s h` format
   (considering several widely used symbols for degrees, minutes and seconds);

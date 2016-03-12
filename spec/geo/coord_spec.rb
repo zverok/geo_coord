@@ -19,6 +19,39 @@ describe Geo::Coord do
     end
   end
 
+  context :from_h do
+    it 'can be created from hash' do
+      c = Geo::Coord.from_h(lat: 50.004444, lng: 36.231389)
+      c.should == Geo::Coord.new(50.004444, 36.231389)
+    end
+
+    it 'supports several variants of keys' do
+      c = Geo::Coord.from_h(latitude: 50.004444, longitude: 36.231389)
+      c.should == Geo::Coord.new(50.004444, 36.231389)
+
+      c = Geo::Coord.from_h(lat: 50.004444, lon: 36.231389)
+      c.should == Geo::Coord.new(50.004444, 36.231389)
+    end
+
+    it 'supports string keys and different cases' do
+      c = Geo::Coord.from_h('lat' => 50.004444, 'lng' => 36.231389)
+      c.should == Geo::Coord.new(50.004444, 36.231389)
+
+      c = Geo::Coord.from_h('Lat' => 50.004444, 'LNG' => 36.231389)
+      c.should == Geo::Coord.new(50.004444, 36.231389)
+    end
+  end
+
+  context 'comparison' do
+    it 'compares on equality' do
+      c1 = Geo::Coord.new(50.004444, 36.231389)
+      c2 = Geo::Coord.new(50.004444, 36.231389)
+      c3 = Geo::Coord.new(-50.004444, 36.231389)
+      c1.should == c2
+      c1.should_not == c3
+    end
+  end
+
   context 'decomposition' do
     it 'decomposes latitude to d, m, s, h' do
       c = Geo::Coord.new(50.004444, 36.231389)
@@ -137,5 +170,11 @@ describe Geo::Coord do
 
     #it 'fails on unknown components' do
     #end
+
+    it 'understands everyting at once' do
+      pos = Geo::Coord.new(50.004444, 36.231389)
+      pos.strfcoord(%q{%latd %latm' %lats" %lath, %lngd %lngm' %lngs" %lngh}).should ==
+        %q{50 0' 16" N, 36 13' 53" E}
+    end
   end
 end
