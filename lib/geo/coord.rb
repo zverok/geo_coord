@@ -28,17 +28,17 @@ module Geo
       end
     end
     
-    def initialize(lat, lng)
-      unless (-90..90).cover?(lat)
-        raise ArgumentError, "Expected latitude to be between -90 and 90, #{lat} received"
+    def initialize(lat = nil, lng = nil, **opts)
+      case
+      when lat && lng
+        _init(lat, lng)
+      when opts.key?(:lat) && opts.key?(:lng)
+        _init(opts[:lat], opts[:lng])
+      when opts.key?(:latd) && opts.key?(:lngd)
+        _init_dms(opts)
+      else
+        raise ArgumentError, "Can't create #{self.class} by provided data"
       end
-
-      unless (-180..180).cover?(lng)
-        raise ArgumentError, "Expected longitude to be between -180 and 180, #{lng} received"
-      end
-      
-      @lat = lat
-      @lng = lng
     end
 
     def ==(other)
@@ -132,6 +132,38 @@ module Geo
     end
 
     private
+
+    def _init(lat, lng)
+      unless (-90..90).cover?(lat)
+        raise ArgumentError, "Expected latitude to be between -90 and 90, #{lat} received"
+      end
+
+      unless (-180..180).cover?(lng)
+        raise ArgumentError, "Expected longitude to be between -180 and 180, #{lng} received"
+      end
+      
+      @lat = lat
+      @lng = lng
+    end
+
+    LATH = {'N' => 1, 'S' => -1}
+    LNGH = {'E' => 1, 'W' => -1}
+
+    def _init_dms(opts)
+      lat = opts[:latd].to_i + opts[:latm].to_i / 60.0 + opts[:lats].to_i / 3600.0
+      if opts[:lath]
+        sign = LATH[opts[:lath]] or
+          raise ArgumentError, "Unidentified hemisphere: #{opts[:lath]}"
+        lat *= sign
+      end
+      lng = opts[:lngd].to_i + opts[:lngm].to_i / 60.0 + opts[:lngs].to_i / 3600.0
+      if opts[:lngh]
+        sign = LNGH[opts[:lngh]] or
+          raise ArgumentError, "Unidentified hemisphere: #{opts[:lngh]}"
+        lng *= sign
+      end
+      _init(lat, lng)
+    end
 
     def latsign
       lat <=> 0

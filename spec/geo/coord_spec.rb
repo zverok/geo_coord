@@ -17,6 +17,23 @@ describe Geo::Coord do
 
       lambda{Geo::Coord.new(50, 360)}.should raise_error(ArgumentError)
     end
+
+    it 'is initialized by (lat: , lng:) keyword args' do
+      c = Geo::Coord.new(lat: 50.004444, lng: 36.231389)
+      c.lat.should == 50.004444
+      c.latitude.should == 50.004444
+    end
+
+    it 'is initialized by d,m,s,h sets' do
+      Geo::Coord.new(latd: 50, lngd: 36).should == Geo::Coord.new(50, 36)
+      Geo::Coord.new(latd: 50, lath: 'S', lngd: 36, lngh: 'W').should == Geo::Coord.new(-50, -36)
+
+      c = Geo::Coord.new(latd: 50, latm: 0, lats: 16,
+                     lngd: 36, lngm: 13, lngs: 53)
+
+      c.lat.should be_close(50.004444, 0.01)
+      c.lng.should be_close(36.231389, 0.01)
+    end
   end
 
   context :from_h do
