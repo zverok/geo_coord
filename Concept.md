@@ -106,6 +106,7 @@ Longitude is -180 to +180.
 
 Class methods:
 * `new(lat, lng)` creates instance from two Numerics (in degrees);
+* `new(lat:, lng:)` keyword arguments form of above;
 * `new(latd:, latm:, lats:, lath:, lngd: lngm:, lngs: lngh:)` creates
   instance from coordinates in (deg, min, sec, hemisphere) form; hemispheres
   are "N"/"S" for latitude and "W"/E" for longitude; any component except
@@ -135,7 +136,7 @@ Instance methods:
   `false`; same with `lngdms` for longitude;
 * `to_s` returning string like "50.004444,36.231389" (good for map
   URLs construction, for example);
-* `to_h(latname = 'lat', lngname = 'lng')` converts coord to hash (with
+* `to_h(lat: :lat, lng: :lng)` converts coord to hash (with
   desired key names);
 * `to_a` converts coord to simple `[lat, lng]` pair;
 * `geohash(precision)`, returning [Geohash](https://en.wikipedia.org/wiki/Geohash)

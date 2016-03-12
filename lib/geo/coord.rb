@@ -75,6 +75,36 @@ module Geo
       {lat.to_sym => self.lat, lng.to_sym => self.lng}
     end
 
+    INTFLAGS = '\+'
+    FLOATUFLAGS = /\.0\d+/
+    FLOATFLAGS = /\+?#{FLOATUFLAGS}/
+
+    DIRECTIVES = {
+      /%(#{INTFLAGS})?latds/ => '%<latds>\1i',
+      '%latd' => '%<latd>i',
+      '%latm' => '%<latm>i',
+      /%(#{FLOATUFLAGS})?lats/ => proc{|m| "%<lats>#{m[1] || '.0'}f"},
+      '%lath' => '%<lath>s',
+      /%(#{FLOATFLAGS})?lat/ => '%<lat>\1f',
+
+      /%(#{INTFLAGS})?lngds/ => '%<lngds>\1i',
+      '%lngd' => '%<lngd>i',
+      '%lngm' => '%<lngm>i',
+      /%(#{FLOATUFLAGS})?lngs/ => proc{|m| "%<lngs>#{m[1] || '.0'}f"},
+      '%lngh' => '%<lngh>s',
+      /%(#{FLOATFLAGS})?lng/ => '%<lng>\1f',
+    }
+
+    def strfcoord(formatstr)
+      DIRECTIVES.reduce(formatstr){|memo, (from, to)|
+        if to.is_a?(Proc)
+          memo.gsub(from){to.call(Regexp.last_match)} # scopes are hard!
+        else
+          memo.gsub(from, to)
+        end
+      } % full_hash
+    end
+
     private
 
     def latsign
@@ -83,6 +113,32 @@ module Geo
 
     def lngsign
       lng <=> 0
+    end
+
+    def latds
+      lat.to_i
+    end
+
+    def lngds
+      lng.to_i
+    end
+
+    def full_hash
+      {
+        latd: latd,
+        latds: latds,
+        latm: latm,
+        lats: lats,
+        lath: lath,
+        lat: lat,
+
+        lngd: lngd,
+        lngds: lngds,
+        lngm: lngm,
+        lngs: lngs,
+        lngh: lngh,
+        lng: lng,
+      }
     end
   end
 end

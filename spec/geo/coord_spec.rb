@@ -85,4 +85,57 @@ describe Geo::Coord do
       c.to_h(lng: :lon).should == {lat: 50.004444, lon: 36.231389}
     end
   end
+
+  context :strfcoord do
+    it 'renders components' do
+      pos = Geo::Coord.new(50.004444, 36.231389)
+      neg = Geo::Coord.new(-50.004444, -36.231389)
+
+      pos.strfcoord('%latd').should == '50'
+      neg.strfcoord('%latd').should == '50'
+      neg.strfcoord('%latds').should == '-50'
+
+      pos.strfcoord('%latm').should == '0'
+      pos.strfcoord('%lats').should == '16'
+      pos.strfcoord('%lath').should == 'N'
+      neg.strfcoord('%lath').should == 'S'
+
+      pos.strfcoord('%lat').should == '%f' % pos.lat
+      neg.strfcoord('%lat').should == '%f' % neg.lat
+
+      pos.strfcoord('%lngd').should == '36'
+      neg.strfcoord('%lngd').should == '36'
+      neg.strfcoord('%lngds').should == '-36'
+
+      pos.strfcoord('%lngm').should == '13'
+      pos.strfcoord('%lngs').should == '53'
+      pos.strfcoord('%lngh').should == 'E'
+      neg.strfcoord('%lngh').should == 'W'
+
+      pos.strfcoord('%lng').should == '%f' % pos.lng
+      neg.strfcoord('%lng').should == '%f' % neg.lng
+    end
+
+    it 'understands flags and options' do
+      pos = Geo::Coord.new(50.004444, 36.231389)
+      neg = Geo::Coord.new(-50.004444, -36.231389)
+
+      pos.strfcoord('%+latds').should == '+50'
+      neg.strfcoord('%+latds').should == '-50'
+
+      pos.strfcoord('%.02lats').should == '%.02f' % pos.lats
+      pos.strfcoord('%.04lat').should == '%.04f' % pos.lat
+      pos.strfcoord('%+.04lat').should == '%+.04f' % pos.lat
+
+      pos.strfcoord('%+lngds').should == '+36'
+      neg.strfcoord('%+lngds').should == '-36'
+
+      pos.strfcoord('%.02lngs').should == '%.02f' % pos.lngs
+      pos.strfcoord('%.04lng').should == '%.04f' % pos.lng
+      pos.strfcoord('%+.04lng').should == '%+.04f' % pos.lng
+    end
+
+    #it 'fails on unknown components' do
+    #end
+  end
 end
