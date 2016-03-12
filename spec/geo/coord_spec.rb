@@ -42,6 +42,22 @@ describe Geo::Coord do
     end
   end
 
+  context 'parsers' do
+    it 'parses lng, lat pair' do
+      # ok
+      Geo::Coord.parse_ll('50.004444, 36.231389').should == Geo::Coord.new(50.004444, 36.231389)
+      Geo::Coord.parse_ll('50.004444,36.231389').should == Geo::Coord.new(50.004444, 36.231389)
+      Geo::Coord.parse_ll('50.004444;36.231389').should == Geo::Coord.new(50.004444, 36.231389)
+      Geo::Coord.parse_ll('50.004444 36.231389').should == Geo::Coord.new(50.004444, 36.231389)
+      Geo::Coord.parse_ll('-50.004444 +36.231389').should == Geo::Coord.new(-50.004444, 36.231389)
+      Geo::Coord.parse_ll('50 36').should == Geo::Coord.new(50, 36)
+
+      # not ok
+      lambda{Geo::Coord.parse_ll('50 36 80')}.should raise_error(ArgumentError)
+      lambda{Geo::Coord.parse_ll('50.04444')}.should raise_error(ArgumentError)
+    end
+  end
+
   context 'comparison' do
     it 'compares on equality' do
       c1 = Geo::Coord.new(50.004444, 36.231389)

@@ -19,6 +19,13 @@ module Geo
 
         new(lat, lng)
       end
+
+      def parse_ll(str)
+        str.match(/^([-+]?\d+(?:\.\d*)?)\s*[,; ]\s*([-+]?\d+(?:\.\d*)?)$/) do |m|
+          return new(m[1].to_f, m[2].to_f)
+        end
+        raise ArgumentError, "Can't parse #{str} as lat, lng"
+      end
     end
     
     def initialize(lat, lng)
