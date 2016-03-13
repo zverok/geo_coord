@@ -20,11 +20,44 @@ module Geo
         new(lat, lng)
       end
 
+      INT_PATTERN = '[-+]?\d+'
+      UINT_PATTERN = '\d+'
+      FLOAT_PATTERN = '[-+]?\d+(?:\.\d*)?'
+      UFLOAT_PATTERN = '\d+(?:\.\d*)?'
+
+      DEG_PATTERN = '[ °d]'
+      MIN_PATTERN = "['′m]"
+      SEC_PATTERN = '["″s]'
+
+      LL_PATTERN = /^(#{FLOAT_PATTERN})\s*[,; ]\s*(#{FLOAT_PATTERN})$/
+
+      DMS_PATTERN =
+        %r{^\s*
+          (?<latd>#{INT_PATTERN})#{DEG_PATTERN}\s*
+          ((?<latm>#{UINT_PATTERN})#{MIN_PATTERN}\s*
+          ((?<lats>#{UFLOAT_PATTERN})#{SEC_PATTERN}\s*)?)?
+          (?<lath>[NS])?
+          \s*[,; ]\s*
+          (?<lngd>#{INT_PATTERN})#{DEG_PATTERN}\s*
+          ((?<lngm>#{UINT_PATTERN})#{MIN_PATTERN}\s*
+          ((?<lngs>#{UFLOAT_PATTERN})#{SEC_PATTERN}\s*)?)?
+          (?<lngh>[EW])?
+          \s*$}x
+
       def parse_ll(str)
-        str.match(/^([-+]?\d+(?:\.\d*)?)\s*[,; ]\s*([-+]?\d+(?:\.\d*)?)$/) do |m|
+        str.match(LL_PATTERN) do |m|
           return new(m[1].to_f, m[2].to_f)
         end
         raise ArgumentError, "Can't parse #{str} as lat, lng"
+      end
+
+      def parse_dms(str)
+        str.match(DMS_PATTERN) do |m|
+          return new(
+            latd: m[:latd], latm: m[:latm], lats: m[:lats], lath: m[:lath],
+            lngd: m[:lngd], lngm: m[:lngm], lngs: m[:lngs], lngh: m[:lngh])
+        end
+        raise ArgumentError, "Can't parse #{str} as degrees-minutes-seconds"
       end
     end
     
@@ -126,9 +159,7 @@ module Geo
       
       DIRECTIVES.reduce(formatstr){|memo, (from, to)|
         memo.gsub(from) do
-          if to.is_a?(Proc)
-            to = to.call(Regexp.last_match) # scopes are hard!
-          end
+          to = to.call(Regexp.last_match) if to.is_a?(Proc)
           to % h
         end
       }

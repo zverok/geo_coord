@@ -73,6 +73,16 @@ describe Geo::Coord do
       lambda{Geo::Coord.parse_ll('50 36 80')}.should raise_error(ArgumentError)
       lambda{Geo::Coord.parse_ll('50.04444')}.should raise_error(ArgumentError)
     end
+
+    it 'parses dmsh pairs' do
+      Geo::Coord.parse_dms(%q{50 0' 16" N, 36 13' 53" E}).should ==
+        Geo::Coord.new(latd: 50, latm: 0, lats: 16, lath: 'N',
+                       lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
+
+      Geo::Coord.parse_dms('50°0′16″N 36°13′53″E').should ==
+        Geo::Coord.new(latd: 50, latm: 0, lats: 16, lath: 'N',
+                       lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
+    end
   end
 
   context 'comparison' do
