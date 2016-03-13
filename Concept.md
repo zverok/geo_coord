@@ -158,13 +158,13 @@ Directives:
 * `%lat` - full latitude, float; can be formatted with more control like
   `%.4lat` (four digits after point) or `%+lat` (explicit plus sign for
   positive latitudes);
-* `%latd` - latitude degrees, signed, integer
-* `%latdu` - latitude degrees unsigned
+* `%latd` - latitude degrees, unsigned, integer
+* `%latds` - latitude degrees, signed
 * `%latm` - latitude minutes, unsigned, integer
 * `%lats` - latitude seconds, unsigned, integer, but can be formatted as
   float: `%.2lats`
 * `%lath` - latitude hemisphere, one letter ("N"/"S")
-* `%lng`, `%lngd`, `%lngdu`, `%lngs`, `%lngh`, `%lngH` - same for longitude
+* `%lng`, `%lngd`, `%lngds`, `%lngs`, `%lngh`, `%lngH` - same for longitude
 * `%%` literal `%` sign
 
 ### `Geo::Globes` module

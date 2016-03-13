@@ -106,29 +106,32 @@ module Geo
     FLOATFLAGS = /\+?#{FLOATUFLAGS}/
 
     DIRECTIVES = {
-      /%(#{INTFLAGS})?latds/ => '%<latds>\1i',
+      /%(#{INTFLAGS})?latds/ => proc{|m| "%<latds>#{m[1]}i"},
       '%latd' => '%<latd>i',
       '%latm' => '%<latm>i',
       /%(#{FLOATUFLAGS})?lats/ => proc{|m| "%<lats>#{m[1] || '.0'}f"},
       '%lath' => '%<lath>s',
-      /%(#{FLOATFLAGS})?lat/ => '%<lat>\1f',
+      /%(#{FLOATFLAGS})?lat/ => proc{|m| "%<lat>#{m[1]}f"},
 
-      /%(#{INTFLAGS})?lngds/ => '%<lngds>\1i',
+      /%(#{INTFLAGS})?lngds/ => proc{|m| "%<lngds>#{m[1]}i"},
       '%lngd' => '%<lngd>i',
       '%lngm' => '%<lngm>i',
       /%(#{FLOATUFLAGS})?lngs/ => proc{|m| "%<lngs>#{m[1] || '.0'}f"},
       '%lngh' => '%<lngh>s',
-      /%(#{FLOATFLAGS})?lng/ => '%<lng>\1f',
+      /%(#{FLOATFLAGS})?lng/ => proc{|m| "%<lng>#{m[1]}f"},
     }
 
     def strfcoord(formatstr)
+      h = full_hash
+      
       DIRECTIVES.reduce(formatstr){|memo, (from, to)|
-        if to.is_a?(Proc)
-          memo.gsub(from){to.call(Regexp.last_match)} # scopes are hard!
-        else
-          memo.gsub(from, to)
+        memo.gsub(from) do
+          if to.is_a?(Proc)
+            to = to.call(Regexp.last_match) # scopes are hard!
+          end
+          to % h
         end
-      } % full_hash
+      }
     end
 
     private

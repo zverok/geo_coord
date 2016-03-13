@@ -29,7 +29,7 @@ describe Geo::Coord do
       Geo::Coord.new(latd: 50, lath: 'S', lngd: 36, lngh: 'W').should == Geo::Coord.new(-50, -36)
 
       c = Geo::Coord.new(latd: 50, latm: 0, lats: 16,
-                     lngd: 36, lngm: 13, lngs: 53)
+                         lngd: 36, lngm: 13, lngs: 53)
 
       c.lat.should be_close(50.004444, 0.01)
       c.lng.should be_close(36.231389, 0.01)
@@ -201,8 +201,10 @@ describe Geo::Coord do
       pos.strfcoord('%+.04lng').should == '%+.04f' % pos.lng
     end
 
-    #it 'fails on unknown components' do
-    #end
+    it 'just leaves unknown parts' do
+      pos = Geo::Coord.new(50.004444, 36.231389)
+      pos.strfcoord('%latd %foo').should == '50 %foo'
+    end
 
     it 'understands everyting at once' do
       pos = Geo::Coord.new(50.004444, 36.231389)
