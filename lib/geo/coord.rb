@@ -122,6 +122,18 @@ module Geo
       nohemisphere ? [lngsign * lngd, lngm, lngs] : [lngd, lngm, lngs, lngh]
     end
 
+    def phi
+      latitude * Math::PI / 180
+    end
+
+    alias :φ :phi
+
+    def la
+      longitude * Math::PI / 180
+    end
+
+    alias :λ :la
+
     def inspect
       '#<%s %s>' % [self.class.name, to_s]
     end

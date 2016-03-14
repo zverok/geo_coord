@@ -134,6 +134,8 @@ Instance methods:
 * `latdms(nohemisphere = false)` returns `[latd, latm, lats, lath]` with
   `hemisphere` param equal to `true`, and `[±latd, latm, lats]` with
   `false`; same with `lngdms` for longitude;
+* `phi` and `φ` is latitude in radians (helpful for math), `la` or `λ`
+  is longitude in radians (not `lambda` to not confuse with Kernel method);
 * `to_s` returning string like "50.004444,36.231389" (good for map
   URLs construction, for example);
 * `to_h(lat: :lat, lng: :lng)` converts coord to hash (with

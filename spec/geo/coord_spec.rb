@@ -6,10 +6,14 @@ describe Geo::Coord do
       c = Geo::Coord.new(50.004444, 36.231389)
       c.lat.should == 50.004444
       c.latitude.should == 50.004444
+      c.phi.should == c.lat * Math::PI / 180
+      c.φ.should == c.phi
 
       c.lng.should == 36.231389
       c.lon.should == 36.231389
       c.longitude.should == 36.231389
+      c.la.should == c.lng * Math::PI / 180
+      c.λ.should == c.la
     end
 
     it "controls argument ranges" do
