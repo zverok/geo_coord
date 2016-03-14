@@ -82,6 +82,18 @@ describe Geo::Coord do
       Geo::Coord.parse_dms('50°0′16″N 36°13′53″E').should ==
         Geo::Coord.new(latd: 50, latm: 0, lats: 16, lath: 'N',
                        lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
+
+      lambda{Geo::Coord.parse_dms('50 36 80')}.should raise_error(ArgumentError)
+    end
+
+    it 'parses most reasonable choice' do
+      Geo::Coord.parse('50.004444, 36.231389').should == Geo::Coord.new(50.004444, 36.231389)
+      Geo::Coord.parse('50 36').should == Geo::Coord.new(50, 36)
+      Geo::Coord.parse(%q{50 0' 16" N, 36 13' 53" E}).should ==
+        Geo::Coord.new(latd: 50, latm: 0, lats: 16, lath: 'N',
+                       lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
+
+      Geo::Coord.parse('50').should be_nil
     end
   end
 

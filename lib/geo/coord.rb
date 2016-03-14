@@ -59,6 +59,10 @@ module Geo
         end
         raise ArgumentError, "Can't parse #{str} as degrees-minutes-seconds"
       end
+
+      def parse(str)
+        parse_ll(str) rescue (parse_dms(str) rescue nil)
+      end
     end
     
     def initialize(lat = nil, lng = nil, **opts)
