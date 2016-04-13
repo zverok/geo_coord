@@ -183,15 +183,12 @@ module Geo
       }
     end
 
-    def distance(to, formula = nil)
-      @globe.distance(self, to, formula)
+    def distance(to)
+      @globe.distance(self, to)
     end
 
     def direction(to)
-      y = Math.sin(to.la - la) * Math.cos(to.phi)
-      x = Math.cos(phi) * Math.sin(to.phi) -
-          Math.sin(phi) * Math.cos(to.phi) * Math.cos(to.la - la)
-      Math.atan2(y, x)
+      @globe.azimuth(self, to)
     end
 
     private

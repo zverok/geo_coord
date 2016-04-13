@@ -19,10 +19,34 @@ module Geo
             cos(from.phi) * cos(to.phi) * cos(to.la - from.la)
         ) * self.class::RADIUS
       end
+
+      def azimuth(from, to)
+        y = Math.sin(to.la - from.la) * Math.cos(to.phi)
+        x = Math.cos(from.phi) * Math.sin(to.phi) -
+            Math.sin(from.phi) * Math.cos(to.phi) * Math.cos(to.la - from.la)
+        atan2(y, x)
+      end
     end
 
     class Earth < Generic
+      # All in SI units (metres)
+      RADIUS = 6378135 
+      MAJOR_AXIS = 6378137
+      MINOR_AXIS = 6356752.3142
+      F = (MAJOR_AXIS - MINOR_AXIS) / MAJOR_AXIS
+
+      VINCENTY_MAX_ITERATIONS = 20
+      VINCENTY_TOLERANCE = 1e-12
+
       def distance(from, to)
+        distance_azimuth(from, to).first
+      end
+
+      def azimuth(from, to)
+        distance_azimuth(from, to).last
+      end
+      
+      def distance_azimuth(from, to)
         # Vincenty formula
         # See http://www.movable-type.co.uk/scripts/latlong-vincenty.html
         l = to.la - from.la
@@ -58,9 +82,9 @@ module Geo
           break if prev_la && (la - prev_la).abs < VINCENTY_TOLERANCE
         end
 
-        # formula failed to converge (happens on antipodal points)
+        # Formula failed to converge (happens on antipodal points)
         # We'll call Haversine formula instead.
-        return super(from, to) if (la - prev_la).abs > VINCENTY_TOLERANCE
+        return [super(from, to), 0] if (la - prev_la).abs > VINCENTY_TOLERANCE
 
         uSq = cosSqAlpha * (MAJOR_AXIS**2 - MINOR_AXIS**2) / (MINOR_AXIS**2)
         a = 1 + uSq/16384*(4096+uSq*(-768+uSq*(320-175*uSq)))
@@ -68,17 +92,8 @@ module Geo
         delta_sigma = b*sin_sigma*(cos2SigmaM+b/4*(cos_sigma*(-1+2*cos2SigmaM*cos2SigmaM)-
           b/6*cos2SigmaM*(-3+4*sin_sigma*sin_sigma)*(-3+4*cos2SigmaM*cos2SigmaM)))
 
-        MINOR_AXIS * a * (sigma-delta_sigma)
+        [MINOR_AXIS * a * (sigma-delta_sigma), 0]
       end
-      
-      # All in SI units (metres)
-      RADIUS = 6378135 
-      MAJOR_AXIS = 6378137
-      MINOR_AXIS = 6356752.3142
-      F = (MAJOR_AXIS - MINOR_AXIS) / MAJOR_AXIS
-
-      VINCENTY_MAX_ITERATIONS = 20
-      VINCENTY_TOLERANCE = 1e-12
     end
   end
 end
