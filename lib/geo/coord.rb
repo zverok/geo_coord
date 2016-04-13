@@ -66,6 +66,8 @@ module Geo
     end
     
     def initialize(lat = nil, lng = nil, **opts)
+      @globe = Globes::Earth.instance
+      
       case
       when lat && lng
         _init(lat, lng)
@@ -179,6 +181,17 @@ module Geo
           to % h
         end
       }
+    end
+
+    def distance(to, formula = nil)
+      @globe.distance(self, to, formula)
+    end
+
+    def direction(to)
+      y = Math.sin(to.la - la) * Math.cos(to.phi)
+      x = Math.cos(phi) * Math.sin(to.phi) -
+          Math.sin(phi) * Math.cos(to.phi) * Math.cos(to.la - la)
+      Math.atan2(y, x)
     end
 
     private

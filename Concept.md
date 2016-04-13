@@ -59,7 +59,7 @@ class (and, to lesser extent, `Date`/`DateTime`). It has this
 responsibilities:
 * stores data in simple internal form;
 * helps to parse and format data to and from strings;
-* provides easy access to logical components of time;
+* provides easy access to logical components of data;
 * allows most simple and unambiguous calculations.
 
 **Main type name**: as far as I can see, there's no good singular name
@@ -75,9 +75,10 @@ which is not 100% linguistically correct, yet convenient). Alternative
 `location.latitude = ...` or something like this.
 
 **Units**: `Geo` calculations (just like `Time` calculations) provide
-no units options, just returning numbers measured in SI units: metres
-for distances and radians for directions (not for latitude/longitude
-themselves, they are degrees).
+no units options, just returning numbers measured in "default" units:
+metres for distances (as they are SI unit) and degrees for azimuth.
+Latitude and longitude are stored in degrees, but radians values accessors
+are provided (being widely used in geodesy math).
 
 **Order relation** is defined on `Geo::Coord` through comparison of their
 _geohashes_. Coordinates comparison has no clear "physical meaning" (as
@@ -183,7 +184,7 @@ Module constants:
 * `DISTANCE_FORMULAE = [:haversine, :flat]`
 
 Module methods:
-* `direction(to)`, also aliased as `azimuth(to)`, returned in radians;
+* `direction(to)`, also aliased as `azimuth(to)`, returned in degrees;
 * `flat_distance(to)` - pythagorean distance between self and `to`;
 * `haversine_distance(to)` - spherical distance;
 * `distance(to, formula = DISTANCE_FORMULAE.first)` - default distance

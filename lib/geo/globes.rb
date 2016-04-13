@@ -10,45 +10,21 @@ module Geo
     class Generic
       include Singleton
       include Math
-      
-      def spheric_distance(from, to)
-        acos(
-            sin(from.phi) *
-            sin(to.phi) +
 
-            cos(from.phi) *
-            cos(to.phi) *
-            cos(to.la - from.la)
+      def distance(from, to)
+        # Haversine formula
+        # See TODO
+       acos(
+            sin(from.phi) * sin(to.phi) +
+            cos(from.phi) * cos(to.phi) * cos(to.la - from.la)
         ) * self.class::RADIUS
-      end
-
-      def haversine_distance(from, to)
-        delta_phi = to.phi - from.phi
-        delta_la  = to.la - from.la
-
-        a = sin(delta_phi/2)**2 +
-            cos(from.phi) *
-            cos(to.phi) *
-            sin(delta_la/2)**2
-
-        c = 2 * atan2(sqrt(a), sqrt(1-a))
-
-        d = self.class::RADIUS * c
       end
     end
 
     class Earth < Generic
-      # All in SI units (metres)
-      RADIUS = 6378135 
-      MAJOR_AXIS = 6378137
-      MINOR_AXIS = 6356752.3142
-      F = (MAJOR_AXIS - MINOR_AXIS) / MAJOR_AXIS
-
-      VINCENTY_MAX_ITERATIONS = 20
-      VINCENTY_TOLERANCE = 1e-12
-
-      # See http://www.movable-type.co.uk/scripts/latlong-vincenty.html
-      def vincenty_distance(from, to)
+      def distance(from, to)
+        # Vincenty formula
+        # See http://www.movable-type.co.uk/scripts/latlong-vincenty.html
         l = to.la - from.la
         u1 = atan((1-F) * tan(from.phi))
         u2 = atan((1-F) * tan(to.phi))
@@ -84,7 +60,7 @@ module Geo
 
         # formula failed to converge (happens on antipodal points)
         # We'll call Haversine formula instead.
-        return haversine_distance(from, to) if (la - prev_la).abs > VINCENTY_TOLERANCE
+        return super(from, to) if (la - prev_la).abs > VINCENTY_TOLERANCE
 
         uSq = cosSqAlpha * (MAJOR_AXIS**2 - MINOR_AXIS**2) / (MINOR_AXIS**2)
         a = 1 + uSq/16384*(4096+uSq*(-768+uSq*(320-175*uSq)))
@@ -94,6 +70,15 @@ module Geo
 
         MINOR_AXIS * a * (sigma-delta_sigma)
       end
+      
+      # All in SI units (metres)
+      RADIUS = 6378135 
+      MAJOR_AXIS = 6378137
+      MINOR_AXIS = 6356752.3142
+      F = (MAJOR_AXIS - MINOR_AXIS) / MAJOR_AXIS
+
+      VINCENTY_MAX_ITERATIONS = 20
+      VINCENTY_TOLERANCE = 1e-12
     end
   end
 end

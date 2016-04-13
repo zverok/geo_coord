@@ -238,4 +238,25 @@ describe Geo::Coord do
         %q{50 0' 16" N, 36 13' 53" E}
     end
   end
+
+  context 'math' do
+    it 'calculates distance through earth globe' do
+      from = Geo::Coord.new(50.004444, 36.231389)
+      to = Geo::Coord.new(38.898748, -77.037684)
+      from.distance(to).should == Geo::Globes::Earth.instance.vincenty_distance(from, to)
+      from.distance(to, :haversine).should ==
+        Geo::Globes::Earth.instance.haversine_distance(from, to)
+    end
+
+    it 'calculates azimuth' do
+      from = Geo::Coord.new(50.004444, 36.231389)
+      to = Geo::Coord.new(38.898748, -77.037684)
+
+      from.direction(to).should be_close(5.44, 0.01)
+      to.direction(from).should be_close(0.66, 0.01)
+      from.direction(from).should be_zero
+
+      from.direction(to).should == from.azimuth(to)
+    end
+  end
 end
