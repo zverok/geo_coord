@@ -12,19 +12,27 @@ module Geo
       include Math
 
       def distance(from, to)
-        # Haversine formula
-        # See TODO
-       acos(
-            sin(from.phi) * sin(to.phi) +
-            cos(from.phi) * cos(to.phi) * cos(to.la - from.la)
-        ) * self.class::RADIUS
+        distance_azimuth(from, to).first
       end
 
       def azimuth(from, to)
-        y = Math.sin(to.la - from.la) * Math.cos(to.phi)
-        x = Math.cos(from.phi) * Math.sin(to.phi) -
-            Math.sin(from.phi) * Math.cos(to.phi) * Math.cos(to.la - from.la)
-        atan2(y, x)
+        (distance_azimuth(from, to).last / PI * 180 + 360) % 360
+      end
+
+      def distance_azimuth(from, to)
+        # Haversine formula
+        # See TODO
+        d = acos(
+            sin(from.phi) * sin(to.phi) +
+            cos(from.phi) * cos(to.phi) * cos(to.la - from.la)
+        ) * self.class::RADIUS
+
+        y = sin(to.la - from.la) * cos(to.phi)
+        x = cos(from.phi) * sin(to.phi) -
+            sin(from.phi) * cos(to.phi) * cos(to.la - from.la)
+        a = atan2(y, x)
+
+        [d, a]
       end
     end
 
@@ -38,14 +46,6 @@ module Geo
       VINCENTY_MAX_ITERATIONS = 20
       VINCENTY_TOLERANCE = 1e-12
 
-      def distance(from, to)
-        distance_azimuth(from, to).first
-      end
-
-      def azimuth(from, to)
-        distance_azimuth(from, to).last
-      end
-      
       def distance_azimuth(from, to)
         # Vincenty formula
         # See http://www.movable-type.co.uk/scripts/latlong-vincenty.html
@@ -56,7 +56,7 @@ module Geo
         sin_u2 = sin(u2); cos_u2 = cos(u2)
 
         la = l # first approximation
-        prev_la, cosSqAlpha, sin_sigma, cos_sigma, sigma, cos2SigmaM = nil
+        prev_la, cosSqAlpha, sin_sigma, cos_sigma, sigma, cos2SigmaM, sin_la, cos_la = nil
 
         VINCENTY_MAX_ITERATIONS.times do
           sin_la = sin(la)
@@ -65,7 +65,7 @@ module Geo
           sin_sigma = sqrt((cos_u2*sin_la) * (cos_u2*sin_la) +
             (cos_u1*sin_u2-sin_u1*cos_u2*cos_la) * (cos_u1*sin_u2-sin_u1*cos_u2*cos_la))
 
-          return 0 if sin_sigma == 0  # co-incident points
+          return [0, 0] if sin_sigma == 0  # co-incident points
 
           cos_sigma = sin_u1*sin_u2 + cos_u1*cos_u2*cos_la
           sigma = atan2(sin_sigma, cos_sigma)
@@ -84,7 +84,7 @@ module Geo
 
         # Formula failed to converge (happens on antipodal points)
         # We'll call Haversine formula instead.
-        return [super(from, to), 0] if (la - prev_la).abs > VINCENTY_TOLERANCE
+        return super if (la - prev_la).abs > VINCENTY_TOLERANCE
 
         uSq = cosSqAlpha * (MAJOR_AXIS**2 - MINOR_AXIS**2) / (MINOR_AXIS**2)
         a = 1 + uSq/16384*(4096+uSq*(-768+uSq*(320-175*uSq)))
@@ -92,7 +92,11 @@ module Geo
         delta_sigma = b*sin_sigma*(cos2SigmaM+b/4*(cos_sigma*(-1+2*cos2SigmaM*cos2SigmaM)-
           b/6*cos2SigmaM*(-3+4*sin_sigma*sin_sigma)*(-3+4*cos2SigmaM*cos2SigmaM)))
 
-        [MINOR_AXIS * a * (sigma-delta_sigma), 0]
+        s = MINOR_AXIS * a * (sigma-delta_sigma)
+        alpha1 = atan2(cos_u2*sin_la, cos_u1*sin_u2 - sin_u1*cos_u2*cos_la)
+        #alpha2 = atan2(cos_u1*sin_la, -sin_u1*cos_u2+cos_u1*sin_u2*cos_la) / PI * 180
+
+        [s, alpha1]
       end
     end
   end

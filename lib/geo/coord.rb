@@ -187,7 +187,7 @@ module Geo
       @globe.distance(self, to)
     end
 
-    def direction(to)
+    def azimuth(to)
       @globe.azimuth(self, to)
     end
 
