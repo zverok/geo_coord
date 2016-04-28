@@ -63,6 +63,34 @@ module Geo
       def parse(str)
         parse_ll(str) rescue (parse_dms(str) rescue nil)
       end
+
+      PARSE_PATTERNS = {
+        '%latd' => "(?<latd>#{INT_PATTERN})",
+        '%latm' => "(?<latm>#{UINT_PATTERN})",
+        '%lats' => "(?<lats>#{UFLOAT_PATTERN})",
+        '%lath' => "(?<lath>[NS])",
+
+        '%lat' => "(?<lat>#{FLOAT_PATTERN})",
+
+        '%lngd' => "(?<lngd>#{INT_PATTERN})",
+        '%lngm' => "(?<lngm>#{UINT_PATTERN})",
+        '%lngs' => "(?<lngs>#{UFLOAT_PATTERN})",
+        '%lngh' => "(?<lngh>[EW])",
+
+        '%lng' => "(?<lng>#{FLOAT_PATTERN})",
+      }
+
+      def strpcoord(str, pattern)
+        pattern = PARSE_PATTERNS.inject(pattern){|memo, (pfrom, pto)|
+          memo.gsub(pfrom, pto)
+        }
+        if m = Regexp.new('^' + pattern).match(str)
+          h = m.names.map{|n| [n.to_sym, m[n] && (n.end_with?('h') ? m[n] : m[n].to_f)]}.to_h
+          new(h)
+        else
+          raise ArgumentError, "Coordinates str #{str} can't be parsed by pattern #{pattern}"
+        end
+      end
     end
     
     def initialize(lat = nil, lng = nil, **opts)

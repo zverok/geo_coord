@@ -43,6 +43,12 @@ describe Geo::Globes::Earth do
     @globe.azimuth(@washington_dc, @anti_washington).should be_close(90, 1)
   end
 
-  #it 'calculates endpoint' do
-  #end
+  it 'calculates endpoint' do
+    d = @globe.distance(@washington_dc, @chicago)
+    a = @globe.azimuth(@washington_dc, @chicago)
+
+    endpoint = @globe.endpoint(@washington_dc, d, a)
+    endpoint.lat.should == @chicago.lat
+    endpoint.lng.should == @chicago.lng
+  end
 end

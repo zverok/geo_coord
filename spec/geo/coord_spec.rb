@@ -239,6 +239,29 @@ describe Geo::Coord do
     end
   end
 
+  context :strpcoord do
+    it 'parses components' do
+      Geo::Coord.strpcoord('50.004444, 36.231389', '%lat, %lng').should ==
+        Geo::Coord.new(lat: 50.004444, lng: 36.231389)
+
+      Geo::Coord.strpcoord(
+        %q{50 0' 16" N, 36 13' 53" E},
+        %q{%latd %latm' %lats" %lath, %lngd %lngm' %lngs" %lngh}).should ==
+        Geo::Coord.new(latd: 50, latm: 0, lats: 16, lngd: 36, lngm: 13, lngs: 53)
+    end
+
+    it 'provides defaults' do
+      lambda{Geo::Coord.strpcoord('50.004444, 36.231389', '%lat; %lng')}.should \
+        raise_error ArgumentError, /can't be parsed/
+    end
+
+    it 'raises on wrong format' do
+    end
+
+    it 'ignores the rest' do
+    end
+  end
+
   context 'math' do
     it 'calculates distance through earth globe' do
       from = Geo::Coord.new(50.004444, 36.231389)
