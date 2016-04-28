@@ -99,9 +99,9 @@ module Geo
       case
       when lat && lng
         _init(lat, lng)
-      when opts.key?(:lat) && opts.key?(:lng)
+      when opts.key?(:lat) || opts.key?(:lng)
         _init(opts[:lat], opts[:lng])
-      when opts.key?(:latd) && opts.key?(:lngd)
+      when opts.key?(:latd) || opts.key?(:lngd)
         _init_dms(opts)
       else
         raise ArgumentError, "Can't create #{self.class} by provided data"
@@ -222,6 +222,9 @@ module Geo
     private
 
     def _init(lat, lng)
+      lat = lat.to_f
+      lng = lng.to_f
+      
       unless (-90..90).cover?(lat)
         raise ArgumentError, "Expected latitude to be between -90 and 90, #{lat} received"
       end

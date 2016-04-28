@@ -25,7 +25,15 @@ describe Geo::Coord do
     it 'is initialized by (lat: , lng:) keyword args' do
       c = Geo::Coord.new(lat: 50.004444, lng: 36.231389)
       c.lat.should == 50.004444
-      c.latitude.should == 50.004444
+      c.lng.should == 36.231389
+
+      c = Geo::Coord.new(lat: 50.004444)
+      c.lat.should == 50.004444
+      c.lng.should == 0
+
+      c = Geo::Coord.new(lng: 36.231389)
+      c.lat.should == 0
+      c.lng.should == 36.231389
     end
 
     it 'is initialized by d,m,s,h sets' do
@@ -36,6 +44,14 @@ describe Geo::Coord do
                          lngd: 36, lngm: 13, lngs: 53)
 
       c.lat.should be_close(50.004444, 0.01)
+      c.lng.should be_close(36.231389, 0.01)
+
+      c = Geo::Coord.new(latd: 50, latm: 0, lats: 16)
+      c.lat.should be_close(50.004444, 0.01)
+      c.lng.should == 0
+
+      c = Geo::Coord.new(lngd: 36, lngm: 13, lngs: 53)
+      c.lat.should == 0
       c.lng.should be_close(36.231389, 0.01)
     end
   end
@@ -251,6 +267,11 @@ describe Geo::Coord do
     end
 
     it 'provides defaults' do
+      Geo::Coord.strpcoord('50.004444', '%lat').should ==
+        Geo::Coord.new(lat: 50.004444, lng: 0)
+
+      Geo::Coord.strpcoord('36.231389', '%lng').should ==
+        Geo::Coord.new(lng: 36.231389)
     end
 
     it 'raises on wrong format' do
