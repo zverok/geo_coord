@@ -251,14 +251,16 @@ describe Geo::Coord do
     end
 
     it 'provides defaults' do
+    end
+
+    it 'raises on wrong format' do
       lambda{Geo::Coord.strpcoord('50.004444, 36.231389', '%lat; %lng')}.should \
         raise_error ArgumentError, /can't be parsed/
     end
 
-    it 'raises on wrong format' do
-    end
-
     it 'ignores the rest' do
+      Geo::Coord.strpcoord('50.004444, 36.231389 is somewhere in Kharkiv', '%lat, %lng').should ==
+        Geo::Coord.new(lat: 50.004444, lng: 36.231389)
     end
   end
 
