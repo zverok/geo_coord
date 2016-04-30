@@ -298,5 +298,11 @@ describe Geo::Coord do
 
       from.azimuth(to).should == Geo::Globes::Earth.instance.azimuth(from, to)
     end
+
+    it 'calculates endpoint through globe' do
+      from = Geo::Coord.new(50.004444, 36.231389)
+      from.endpoint(958183, 293).should ==
+        Geo::Globes::Earth.instance.endpoint(from, 958183, 293)
+    end
   end
 end

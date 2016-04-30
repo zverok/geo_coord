@@ -223,6 +223,10 @@ module Geo
       @globe.azimuth(self, to)
     end
 
+    def endpoint(distance, azimuth)
+      @globe.endpoint(self, distance, azimuth)
+    end
+
     private
 
     def _init(lat, lng)
