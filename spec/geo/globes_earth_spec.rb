@@ -48,7 +48,7 @@ describe Geo::Globes::Earth do
     a = @globe.azimuth(@washington_dc, @chicago)
 
     endpoint = @globe.endpoint(@washington_dc, d, a)
-    endpoint.lat.should == @chicago.lat
-    endpoint.lng.should == @chicago.lng
+    endpoint.lat.should be_close(@chicago.lat, 0.1)
+    endpoint.lng.should be_close(@chicago.lng, 0.1)
   end
 end

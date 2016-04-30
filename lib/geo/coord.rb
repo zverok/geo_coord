@@ -20,6 +20,10 @@ module Geo
         new(lat, lng)
       end
 
+      def from_rad(la, phi)
+        new(la * 180 / Math::PI, phi * 180 / Math::PI)
+      end
+
       INT_PATTERN = '[-+]?\d+'
       UINT_PATTERN = '\d+'
       FLOAT_PATTERN = '[-+]?\d+(?:\.\d*)?'
