@@ -62,7 +62,7 @@ responsibilities:
 * provides easy access to logical components of data;
 * allows most simple and unambiguous calculations.
 
-**Main type name**: as far as I can see, there's no good singular name
+**Main type name**: as far as we can see, there's no good singular name
 for `(lat, lng)` pair concept. As mentioned above, there can be seen
 names like `LatLng`, or `Location`, or `Point`; and in natural language
 just "coordinates" used frequently. We propose the name `Coord`, which
@@ -80,19 +80,13 @@ metres for distances (as they are SI unit) and degrees for azimuth.
 Latitude and longitude are stored in degrees, but radians values accessors
 are provided (being widely used in geodesy math).
 
-**Order relation** is defined on `Geo::Coord` through comparison of their
-_geohashes_. Coordinates comparison has no clear "physical meaning" (as
-you can't say what it means of "point A" is "less than point B"), but
-comparability is important for value objects, and _sorting_ array of
-points by geohash provides near-to-intuitive results: points that are
-adjacent in sorted array, are nearest to each other on the map. (This
-intuition is broken on quadrant edges, which should be stated clearly
-in documentation.)
-
-There's introduced **concept of globe** for calculations. Only generic
-(sphere) and Earth globes are implemented, but for 2016 we feel like
-current design of basic types should take in consideration possibility
-of writing Ruby scripts for Mars maps analysis.
+There's introduced **concept of globe** used internally for calculations.
+Only generic (sphere) and Earth globes are implemented, but for 2016 we
+feel like current design of basic types should take in consideration
+possibility of writing Ruby scripts for Mars maps analysis. Only one
+geodesy formula is implemented (Vincenty, generally considered one of
+the most precise), as for standard library class it considered
+unnecessary to provide user with geodesy formulae options.
 
 No **map projection** math was added into current proposal, but it
 may be a good direction for further work. No **elevation** data considered
@@ -115,12 +109,12 @@ Class methods:
   degrees sign (lat: positive is "N", lng: positive is "E");
 * `from_h(hash)` creates instance from hash with `"lat"` or `"latitude"`
   key and `"lon"` or `"lng"` or `"longitude"` key (case-independent);
+* `from_radians(phi, la)` creates instance from radian values;
 * `strpcoord` parses string into coordinates by provided pattern (see
   below for pattern description);
 * `parse_ll` parses coordinates string in `"float, float"` form;
 * `parse_dms` parses coordinates string in `d m s h, d m s h` format
   (considering several widely used symbols for degrees, minutes and seconds);
-* `geohash(str)` parses coordinates from [Geohash](https://en.wikipedia.org/wiki/Geohash);
 * `parse` tries to parse string into coordinates from various formats.
 
 Instance methods:
@@ -142,12 +136,12 @@ Instance methods:
 * `to_h(lat: :lat, lng: :lng)` converts coord to hash (with
   desired key names);
 * `to_a` converts coord to simple `[lat, lng]` pair;
-* `geohash(precision)`, returning [Geohash](https://en.wikipedia.org/wiki/Geohash)
-  from coordinates;
 * `strfcoord(formatstr)` for complex coordinate formatting (see below
   for format string description);
-* several geodesy math routines (distances and directions) are included
-  from `Geo::Globes::Earth`.
+* `distance(other)` calculates distance to another point (in metres);
+* `azimuth(other)` calculates direction to target (in degrees);
+* `endpoint(direction, azimuth)` calculates final point of the line of
+  `distance` metres going in `azimuth` direction from current point.
 
 #### `strpcoord`/`strfcoord`
 
@@ -170,29 +164,8 @@ Directives:
 * `%lng`, `%lngd`, `%lngds`, `%lngs`, `%lngh`, `%lngH` - same for longitude
 * `%%` literal `%` sign
 
-### `Geo::Globes` module
+### Current implementation
 
-Each _globe_ corresponds to some planet, and is a module containing math
-for this planet. Currently, only `Geo::Globes::Generic` and `Geo::Globes::Earth`
-are defined.
-
-#### `Geo::Globes::Generic`
-
-Module expects to be included into `Geo::Coord`
-
-Module constants:
-* `DISTANCE_FORMULAE = [:haversine, :flat]`
-
-Module methods:
-* `direction(to)`, also aliased as `azimuth(to)`, returned in degrees;
-* `flat_distance(to)` - pythagorean distance between self and `to`;
-* `haversine_distance(to)` - spherical distance;
-* `distance(to, formula = DISTANCE_FORMULAE.first)` - default distance
-  calculation;
-
-#### `Geo::Globes::Earth`
-
-Includes `Generic` and extends it with (now default) `vincent_distance`
-method.
-
-Included into `Geo::Coord` by default.
+Proposed implementation can be found at https://github.com/zverok/geo_coord.
+It was created with thoughts of standard library, so, all docs are in
+RDoc format, and tests/specs are in mspec-compatible rspec flavour.
