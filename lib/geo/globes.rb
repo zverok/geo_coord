@@ -1,49 +1,33 @@
 require 'singleton'
 
-# Notes on this file
-#
-# **Credits:**
-#
-# Most of the initial code/algo, as well as tests were initially borrowed from
-# [Graticule](https://github.com/collectiveidea/graticule).
-#
-# Algo descriptions borrowed from
-#
-# * http://www.movable-type.co.uk/scripts/latlong.html (simple)
-# * http://www.movable-type.co.uk/scripts/latlong-vincenty.html (Vincenty)
-#
-# **On naming and code style:**
-#
-# Two main methods (distance/azimuth between two points and endpoint by
-# startpoint and distance/azimuth) are named `inverse` & `direct` due
-# to solving "two main geodetic problems": https://en.wikipedia.org/wiki/Geodesy#Geodetic_problems
-#
-# Code for them is pretty "un-Ruby-ish", trying to preserve original
-# formulae as much as possible (including use of Greek characters and
-# inconsistent naming of some things: "simple" solution of direct problem
-# names distance `d`, while Vincenty formula uses `s`).
-#
-#
-
 module Geo
-  module Globes
+  module Globes # :nodoc:all
+    # Notes on this module
+    #
+    # **Credits:**
+    #
+    # Most of the initial code/algo, as well as tests were initially borrowed from
+    # [Graticule](https://github.com/collectiveidea/graticule).
+    #
+    # Algo descriptions borrowed from
+    #
+    # * http://www.movable-type.co.uk/scripts/latlong.html (simple)
+    # * http://www.movable-type.co.uk/scripts/latlong-vincenty.html (Vincenty)
+    #
+    # **On naming and code style:**
+    #
+    # Two main methods (distance/azimuth between two points and endpoint by
+    # startpoint and distance/azimuth) are named `inverse` & `direct` due
+    # to solving "two main geodetic problems": https://en.wikipedia.org/wiki/Geodesy#Geodetic_problems
+    #
+    # Code for them is pretty "un-Ruby-ish", trying to preserve original
+    # formulae as much as possible (including use of Greek characters and
+    # inconsistent naming of some things: "simple" solution of direct problem
+    # names distance `d`, while Vincenty formula uses `s`).
+    #
     class Generic
       include Singleton
       include Math
-
-      def distance(from, to)
-        inverse(from.φ, from.λ, to.φ, to.λ).first
-      end
-
-      def azimuth(from, to)
-        (inverse(from.φ, from.λ, to.φ, to.λ).last / PI * 180 + 360) % 360
-      end
-
-      def endpoint(from, distance, azimuth)
-        Coord.from_rad(*direct(from.φ, from.λ, distance, azimuth * PI / 180))
-      end
-
-      protected
 
       def inverse(φ1, λ1, φ2, λ2)
         # See http://www.movable-type.co.uk/scripts/latlong.html
@@ -52,7 +36,7 @@ module Geo
         a = sin(Δφ/2)**2 + cos(φ1)*cos(φ2) * sin(Δλ/2)**2
         c = 2 * atan2(sqrt(a), sqrt(1-a))
         d = r * c
-        
+
         y = sin(Δλ) * cos(φ1)
         x = cos(φ1) * sin(φ2) - sin(φ1) * cos(φ2) * cos(Δλ)
 
@@ -68,6 +52,8 @@ module Geo
         [φ2, λ2]
       end
 
+      private
+
       def r
         self.class::RADIUS
       end
@@ -75,7 +61,7 @@ module Geo
 
     class Earth < Generic
       # All in SI units (metres)
-      RADIUS = 6378135 
+      RADIUS = 6378135
       MAJOR_AXIS = 6378137
       MINOR_AXIS = 6356752.3142
       F = (MAJOR_AXIS - MINOR_AXIS) / MAJOR_AXIS
@@ -151,7 +137,7 @@ module Geo
 
         σ = s / (MINOR_AXIS*a)
         σʹ = nil
-        
+
         begin
             cos2σM = cos(2*σ1 + σ);
             sinσ = sin(σ);

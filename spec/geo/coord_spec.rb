@@ -170,7 +170,7 @@ describe Geo::Coord do
       c = Geo::Coord.new(50.004444, 36.231389)
       c.inspect.should == '#<Geo::Coord 50.004444,36.231389>'
     end
-    
+
     it 'is convertible to string' do
       c = Geo::Coord.new(50.004444, 36.231389)
       c.to_s.should == '50.004444,36.231389'
@@ -189,8 +189,11 @@ describe Geo::Coord do
       c.to_h.should == {lat: 50.004444, lng: 36.231389}
       c.to_h(lat: :latitude, lng: :longitude).should ==
         {latitude: 50.004444, longitude: 36.231389}
-        
+
       c.to_h(lng: :lon).should == {lat: 50.004444, lon: 36.231389}
+
+      c.to_h(lat: 'LAT', lng: 'LNG').should ==
+        {'LAT' => 50.004444, 'LNG' => 36.231389}
     end
   end
 
@@ -234,6 +237,7 @@ describe Geo::Coord do
       pos.strfcoord('%.02lats').should == '%.02f' % pos.lats
       pos.strfcoord('%.04lat').should == '%.04f' % pos.lat
       pos.strfcoord('%+.04lat').should == '%+.04f' % pos.lat
+      pos.strfcoord('%+lat').should == '%+f' % pos.lat
 
       pos.strfcoord('%+lngds').should == '+36'
       neg.strfcoord('%+lngds').should == '-36'
@@ -282,27 +286,6 @@ describe Geo::Coord do
     it 'ignores the rest' do
       Geo::Coord.strpcoord('50.004444, 36.231389 is somewhere in Kharkiv', '%lat, %lng').should ==
         Geo::Coord.new(lat: 50.004444, lng: 36.231389)
-    end
-  end
-
-  context 'math' do
-    it 'calculates distance through earth globe' do
-      from = Geo::Coord.new(50.004444, 36.231389)
-      to = Geo::Coord.new(38.898748, -77.037684)
-      from.distance(to).should == Geo::Globes::Earth.instance.distance(from, to)
-    end
-
-    it 'calculates azimuth through globe' do
-      from = Geo::Coord.new(50.004444, 36.231389)
-      to = Geo::Coord.new(38.898748, -77.037684)
-
-      from.azimuth(to).should == Geo::Globes::Earth.instance.azimuth(from, to)
-    end
-
-    it 'calculates endpoint through globe' do
-      from = Geo::Coord.new(50.004444, 36.231389)
-      from.endpoint(958183, 293).should ==
-        Geo::Globes::Earth.instance.endpoint(from, 958183, 293)
     end
   end
 end

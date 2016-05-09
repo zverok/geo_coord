@@ -1,0 +1,42 @@
+AllCops:
+  Include:
+    - 'lib/**/*'
+  Exclude:
+    # It is too heavy with math and formulae
+    - 'lib/geo/globes.rb'
+    - 'spec/*'
+    - 'spec/**/*'
+    - 'vendor/**/*'
+    - 'tmp/*'
+  DisplayCopNames: true
+
+Metrics/LineLength:
+  Max: 120
+
+Style/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: no_space
+
+Style/AndOr:
+  Enabled: false
+
+Style/AsciiComments:
+  Enabled: false
+
+Style/AsciiIdentifiers:
+  Enabled: false
+
+Style/FormatString:
+  EnforcedStyle: percent
+
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    "%i": "[]"
+
+Metrics/ClassLength:
+  Max: 260
+
+Metrics/CyclomaticComplexity:
+  Max: 7
+
+Metrics/MethodLength:
+  Max: 14
