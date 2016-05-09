@@ -120,15 +120,15 @@ Class methods:
 Instance methods:
 * `lat` and `lng`, returning `Float`s, signed;
 * `latitude` and `longitude` as an aliases; `lon` as an additional
-  aliase for longitude;
+  aliases for longitude;
 * `latd`, `latm`, `lats`, `lath`: degree, minute, second, hemisphere;
   `latd` and `latm` are `Fixnum`, `lats` is `Float`, `lath` is "N"/"S"; all
   numbers are unsigned;
 * `lngd`, `lngm`, `lngs`, `lngh`: the same for longitude (hemisphere is
   "W"/"E");
 * `latdms(nohemisphere = false)` returns `[latd, latm, lats, lath]` with
-  `hemisphere` param equal to `true`, and `[±latd, latm, lats]` with
-  `false`; same with `lngdms` for longitude;
+  `nohemisphere` param equal to `false`, and `[±latd, latm, lats]` with
+  `true`; same with `lngdms` for longitude;
 * `phi` and `φ` is latitude in radians (helpful for math), `la` or `λ`
   is longitude in radians (not `lambda` to not confuse with Kernel method);
 * `to_s` returning string like "50.004444,36.231389" (good for map
