@@ -8,7 +8,10 @@
 #
 module Geo
   # Geo::Coord is main class of Geo module, representing
-  # +(latitude, longitude)+ pair. It stores
+  # +(latitude, longitude)+ pair. It stores coordinates in floating-point
+  # degrees form, provides access to coordinate components, allows complex
+  # formatting and parsing of coordinate pairs and performs geodesy
+  # calculations in standard WGS-84 coordinate reference system.
   #
   # == Examples of usage
   #

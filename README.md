@@ -80,6 +80,10 @@ metres for distances (as they are SI unit) and degrees for azimuth.
 Latitude and longitude are stored in degrees, but radians values accessors
 are provided (being widely used in geodesy math).
 
+All coordinates and calculations are thought to be in
+[WGS 84](https://en.wikipedia.org/wiki/World_Geodetic_System#A_new_World_Geodetic_System:_WGS_84)
+coordinates reference system, being current standard for maps and GPS.
+
 There's introduced **concept of globe** used internally for calculations.
 Only generic (sphere) and Earth globes are implemented, but for 2016 we
 feel like current design of basic types should take in consideration
