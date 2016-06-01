@@ -663,4 +663,4 @@ module Geo
   end
 end
 
-require_relative 'globes'
+require_relative 'coord/globes'

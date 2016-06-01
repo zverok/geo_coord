@@ -1,6 +1,6 @@
 require File.expand_path('../../spec_helper', __FILE__)
 
-describe Geo::Globes::Earth do
+describe Geo::Coord::Globes::Earth do
   before{
     @washington_dc = Geo::Coord.new(38.898748, -77.037684)
     @chicago = Geo::Coord.new(41.85, -87.65)
