@@ -3,3 +3,4 @@ vendor
 Gemfile.lock
 doc
 tmp
+.yardoc

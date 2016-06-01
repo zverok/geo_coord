@@ -102,7 +102,9 @@ module Geo
     alias lon lng
 
     class << self
+      # @private
       LAT_KEYS = %i[lat latitude].freeze           # :nodoc:
+      # @private
       LNG_KEYS = %i[lng lon long longitude].freeze # :nodoc:
 
       # Creates Coord from hash, containing latitude and longitude.
@@ -136,17 +138,26 @@ module Geo
         new(phi * 180 / Math::PI, la * 180 / Math::PI)
       end
 
+      # @private
       INT_PATTERN = '[-+]?\d+'.freeze              # :nodoc:
+      # @private
       UINT_PATTERN = '\d+'.freeze                  # :nodoc:
+      # @private
       FLOAT_PATTERN = '[-+]?\d+(?:\.\d*)?'.freeze  # :nodoc:
+      # @private
       UFLOAT_PATTERN = '\d+(?:\.\d*)?'.freeze      # :nodoc:
 
+      # @private
       DEG_PATTERN = '[ °d]'.freeze                 # :nodoc:
+      # @private
       MIN_PATTERN = "['′m]".freeze                 # :nodoc:
+      # @private
       SEC_PATTERN = '["″s]'.freeze                 # :nodoc:
 
+      # @private
       LL_PATTERN = /^(#{FLOAT_PATTERN})\s*[,; ]\s*(#{FLOAT_PATTERN})$/ # :nodoc:
 
+      # @private
       DMS_PATTERN = # :nodoc:
         /^\s*
           (?<latd>#{INT_PATTERN})#{DEG_PATTERN}\s*
@@ -213,6 +224,7 @@ module Geo
         # rubocop:enable Style/RescueModifier
       end
 
+      # @private
       PARSE_PATTERNS = { # :nodoc:
         '%latd' => "(?<latd>#{INT_PATTERN})",
         '%latm' => "(?<latm>#{UINT_PATTERN})",
@@ -458,10 +470,14 @@ module Geo
       {lat => self.lat, lng => self.lng}
     end
 
+    # @private
     INTFLAGS = '\+'.freeze              # :nodoc:
+    # @private
     FLOATUFLAGS = /\.0\d+/              # :nodoc:
+    # @private
     FLOATFLAGS = /\+?#{FLOATUFLAGS}?/   # :nodoc:
 
+    # @private
     DIRECTIVES = {                      # :nodoc:
       /%(#{INTFLAGS})?latds/ => proc { |m| "%<latds>#{m[1]}i" },
       '%latd' => '%<latd>i',
@@ -578,7 +594,9 @@ module Geo
       @lng = lng
     end
 
+    # @private
     LATH = {'N' => 1, 'S' => -1}.freeze # :nodoc:
+    # @private
     LNGH = {'E' => 1, 'W' => -1}.freeze # :nodoc:
 
     def _init_dms(opts) # rubocop:disable Metrics/AbcSize

@@ -1,6 +1,7 @@
 require 'singleton'
 
 module Geo
+  # @private
   module Globes # :nodoc:all
     # Notes on this module
     #
