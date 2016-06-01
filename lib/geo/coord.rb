@@ -62,7 +62,7 @@ module Geo
   #    g = Geo::Coord.strpcoord('50.004444, 36.231389', '%lat, %lng')
   #    # => #<Geo::Coord 50.004444,36.231389>
   #
-  # Having Coord object, you can get its propreties:
+  # Having Coord object, you can get its properties:
   #
   #    g = Geo::Coord.new(50.004444, 36.231389)
   #    g.lat # => 50.004444

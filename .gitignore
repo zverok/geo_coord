@@ -4,3 +4,4 @@ Gemfile.lock
 doc
 tmp
 .yardoc
+coverage
