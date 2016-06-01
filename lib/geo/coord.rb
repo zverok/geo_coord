@@ -103,7 +103,7 @@ module Geo
 
     class << self
       # @private
-      LAT_KEYS = %i[lat latitude].freeze           # :nodoc:
+      LAT_KEYS = %i[lat latitude].freeze # :nodoc:
       # @private
       LNG_KEYS = %i[lng lon long longitude].freeze # :nodoc:
 
@@ -139,20 +139,20 @@ module Geo
       end
 
       # @private
-      INT_PATTERN = '[-+]?\d+'.freeze              # :nodoc:
+      INT_PATTERN = '[-+]?\d+'.freeze # :nodoc:
       # @private
-      UINT_PATTERN = '\d+'.freeze                  # :nodoc:
+      UINT_PATTERN = '\d+'.freeze # :nodoc:
       # @private
-      FLOAT_PATTERN = '[-+]?\d+(?:\.\d*)?'.freeze  # :nodoc:
+      FLOAT_PATTERN = '[-+]?\d+(?:\.\d*)?'.freeze # :nodoc:
       # @private
-      UFLOAT_PATTERN = '\d+(?:\.\d*)?'.freeze      # :nodoc:
+      UFLOAT_PATTERN = '\d+(?:\.\d*)?'.freeze # :nodoc:
 
       # @private
-      DEG_PATTERN = '[ °d]'.freeze                 # :nodoc:
+      DEG_PATTERN = '[ °d]'.freeze # :nodoc:
       # @private
-      MIN_PATTERN = "['′m]".freeze                 # :nodoc:
+      MIN_PATTERN = "['′m]".freeze # :nodoc:
       # @private
-      SEC_PATTERN = '["″s]'.freeze                 # :nodoc:
+      SEC_PATTERN = '["″s]'.freeze # :nodoc:
 
       # @private
       LL_PATTERN = /^(#{FLOAT_PATTERN})\s*[,; ]\s*(#{FLOAT_PATTERN})$/ # :nodoc:
@@ -202,7 +202,8 @@ module Geo
         str.match(DMS_PATTERN) do |m|
           return new(
             latd: m[:latd], latm: m[:latm], lats: m[:lats], lath: m[:lath],
-            lngd: m[:lngd], lngm: m[:lngm], lngs: m[:lngs], lngh: m[:lngh])
+            lngd: m[:lngd], lngm: m[:lngm], lngs: m[:lngs], lngh: m[:lngh]
+          )
         end
         raise ArgumentError, "Can't parse #{str} as degrees-minutes-seconds"
       end
@@ -471,14 +472,14 @@ module Geo
     end
 
     # @private
-    INTFLAGS = '\+'.freeze              # :nodoc:
+    INTFLAGS = '\+'.freeze # :nodoc:
     # @private
-    FLOATUFLAGS = /\.0\d+/              # :nodoc:
+    FLOATUFLAGS = /\.0\d+/ # :nodoc:
     # @private
-    FLOATFLAGS = /\+?#{FLOATUFLAGS}?/   # :nodoc:
+    FLOATFLAGS = /\+?#{FLOATUFLAGS}?/ # :nodoc:
 
     # @private
-    DIRECTIVES = {                      # :nodoc:
+    DIRECTIVES = { # :nodoc:
       /%(#{INTFLAGS})?latds/ => proc { |m| "%<latds>#{m[1]}i" },
       '%latd' => '%<latd>i',
       '%latm' => '%<latm>i',

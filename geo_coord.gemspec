@@ -1,8 +1,8 @@
-require './lib/geo/version'
+require './lib/geo/coord/version'
 
 Gem::Specification.new do |s|
   s.name     = 'geo_coord'
-  s.version  = Geo::VERSION
+  s.version  = Geo::Coord::VERSION
   s.authors  = ['Victor Shepelev']
   s.email    = 'zverok.offline@gmail.com'
   s.homepage = 'https://github.com/zverok/geo_coord'

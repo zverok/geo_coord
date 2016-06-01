@@ -3,7 +3,7 @@ AllCops:
     - 'lib/**/*'
   Exclude:
     # It is too heavy with math and formulae
-    - 'lib/geo/globes.rb'
+    - 'lib/geo/coord/globes.rb'
     - 'spec/*'
     - 'spec/**/*'
     - 'vendor/**/*'
@@ -23,6 +23,9 @@ Style/AsciiComments:
   Enabled: false
 
 Style/AsciiIdentifiers:
+  Enabled: false
+
+Style/EmptyCaseCondition:
   Enabled: false
 
 Style/FormatString:
