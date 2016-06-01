@@ -1,7 +1,7 @@
 # Geo::Coord—simple geo coordinates class for Ruby
 
 [![Gem Version](https://badge.fury.io/rb/geo_coord.svg)](http://badge.fury.io/rb/geo_coord)
-[![Dependency Status](https://gemnasium.com/zverok/geo_coord..svg)](https://gemnasium.com/zverok/geo_coord)
+[![Dependency Status](https://gemnasium.com/zverok/geo_coord.svg)](https://gemnasium.com/zverok/geo_coord)
 [![Build Status](https://travis-ci.org/zverok/geo_coord.svg?branch=master)](https://travis-ci.org/zverok/geo_coord)
 [![Coverage Status](https://coveralls.io/repos/zverok/geo_coord/badge.svg?branch=master)](https://coveralls.io/r/zverok/geo_coord?branch=master)
 

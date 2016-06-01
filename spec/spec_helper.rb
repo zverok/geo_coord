@@ -1,6 +1,14 @@
 if Object.const_defined?(:RSpec) # otherwise it is mspec
   require 'stringio'
   require 'simplecov'
+  require 'coveralls'
+
+  Coveralls.wear!
+
+  SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
+    [SimpleCov::Formatter::HTMLFormatter,
+    Coveralls::SimpleCov::Formatter]
+  )
 
   SimpleCov.start
 
