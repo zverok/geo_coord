@@ -18,7 +18,7 @@ and incapsulating related concepts and calculations.
 
 ## Reasons
 
-Geo coordinates is, in fact, one of a basic types in XXI century programming.
+Geo coordinates are, in fact, one of basic types in XXI century programming.
 
 This gem is a (desperate) attempt to provide such a "basic" type ready
 to be dropped into any of Ruby code, to unify all different `LatLng` or
@@ -28,7 +28,7 @@ for easy data exchange and natural usage.
 As an independent gem, this attempt is doomed by design, but why not
 to try?..
 
-Initially, I've done this work as a proposal for inclusion into Ruby's
+Initially, I've done this work as a proposal for inclusion in Ruby's
 standard library, but it was not met very well.
 So, now I'm releasing it as a gem to be available at least for my own
 other projects.
@@ -37,13 +37,13 @@ You can read my initial proposal [here](https://github.com/zverok/geo_coord/blob
 and discussion in Ruby tracker [there](https://bugs.ruby-lang.org/issues/12361).
 
 I still have a small hope it would be part of stdlib once, that's why I
-preserve style of specs (outdated rspec, but compatible with mspec used
+preserve the style of specs (outdated rspec, but compatible with mspec used
 for standard library) and docs (yard in RDoc-compatibility mode).
 
 ## Design decisions
 
 While designing `Geo` library, my reference point was standard `Time`
-class (and, to lesser extent, `Date`/`DateTime`). It has this
+class (and, to lesser extent, `Date`/`DateTime`). It has these
 responsibilities:
 * stores data in simple internal form;
 * helps to parse and format data to and from strings;
@@ -60,7 +60,7 @@ just "coordinates" used frequently. I propose the name `Coord`, which
 is pretty short, easy to remember, demonstrates intentions (and looks
 like singular, so you can have "one coord object" and "array of coords",
 which is not 100% linguistically correct, yet convenient). Alternative
-`Point` name seems to be too ambigous, being used in many contexts.
+`Point` name seems to be too ambiguous, being used in many contexts.
 
 `Geo::Coord` object is **immutable**, there's no semantical sense in
 `location.latitude = ...` or something like this.
@@ -75,15 +75,15 @@ All coordinates and calculations are thought to be in
 [WGS 84](https://en.wikipedia.org/wiki/World_Geodetic_System#A_new_World_Geodetic_System:_WGS_84)
 coordinates reference system, being current standard for maps and GPS.
 
-There's introduced **concept of globe** used internally for calculations.
+There's introduced **a concept of globe** used internally for calculations.
 Only generic (sphere) and Earth globes are implemented, but for 2016 I
-feel like current design of basic types should take in consideration
+feel like the current design of basic types should take in consideration
 possibility of writing Ruby scripts for Mars maps analysis. Only one
 geodesy formula is implemented (Vincenty, generally considered one of
 the most precise), as for standard library class it considered
-unnecessary to provide user with geodesy formulae options.
+unnecessary to provide a user with geodesy formulae options.
 
-No **map projection** math was added into current gem, but it
+No **map projection** math was added into the current gem, but it
 may be a good direction for further work. No **elevation** data considered
 either.
 
