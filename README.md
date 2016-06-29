@@ -90,7 +90,7 @@ either.
 ## Installation
 
 Now when it is a gem, just do your usual `gem install geo_coord` or add
-`gem "geo_coord"` to your Gemfile.
+`gem "geo_coord", require: "geo/coord"` to your Gemfile.
 
 ## Usage
 
