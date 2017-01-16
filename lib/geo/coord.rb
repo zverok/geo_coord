@@ -268,12 +268,9 @@ module Geo
         pattern = PARSE_PATTERNS.inject(pattern) do |memo, (pfrom, pto)|
           memo.gsub(pfrom, pto)
         end
-        if (m = Regexp.new('^' + pattern).match(str))
-          h = m.names.map { |n| [n.to_sym, _extract_match(m, n)] }.to_h
-          new(h)
-        else
-          raise ArgumentError, "Coordinates str #{str} can't be parsed by pattern #{pattern}"
-        end
+        match = Regexp.new('^' + pattern).match(str)
+        raise ArgumentError, "Coordinates str #{str} can't be parsed by pattern #{pattern}" unless match
+        new(match.names.map { |n| [n.to_sym, _extract_match(match, n)] }.to_h)
       end
 
       private
