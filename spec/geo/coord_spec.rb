@@ -52,6 +52,10 @@ describe Geo::Coord do
       c.lat.should == 0
       c.lng.should be_close(36.231389, 0.01)
     end
+
+    it 'is rasing ArgumentError when arguments are missing' do
+      lambda{Geo::Coord.new()}.should raise_error(ArgumentError)
+    end
   end
 
   context :from_h do
@@ -98,6 +102,10 @@ describe Geo::Coord do
                        lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
 
       Geo::Coord.parse_dms('50°0′16″N 36°13′53″E').should ==
+        Geo::Coord.new(latd: 50, latm: 0, lats: 16, lath: 'N',
+                       lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
+
+      Geo::Coord.parse_dms('50°0’16″N 36°13′53″E').should ==
         Geo::Coord.new(latd: 50, latm: 0, lats: 16, lath: 'N',
                        lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
 

@@ -8,22 +8,17 @@ Gem::Specification.new do |s|
   s.homepage = 'https://github.com/zverok/geo_coord'
 
   s.summary = 'Geo::Coord class'
-  s.description = <<-EOF
-  EOF
+  s.description = <<-DESC
+  DESC
   s.licenses = ['MIT']
 
   s.files = `git ls-files`.split($RS).reject do |file|
-    file =~ /^(?:
-    spec\/.*
-    |Gemfile
-    |Rakefile
-    |\.rspec
-    |\.gitignore
-    |\.rubocop.yml
+    file =~ %r{^(?: spec\/.* |Gemfile |Rakefile
+    |\.rspec |\.gitignore |\.rubocop.yml
     |\.travis.yml
-    )$/x
+    )$}x
   end
-  s.require_paths = ["lib"]
+  s.require_paths = ['lib']
 
   s.required_ruby_version = '>= 2.1.0'
 

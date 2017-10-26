@@ -1,6 +1,8 @@
 AllCops:
   Include:
     - 'lib/**/*'
+    - 'Gemfile'
+    - 'Rakefile'
   Exclude:
     # It is too heavy with math and formulae
     - 'lib/geo/coord/globes.rb'
@@ -13,7 +15,7 @@ AllCops:
 Metrics/LineLength:
   Max: 120
 
-Style/SpaceInsideHashLiteralBraces:
+Layout/SpaceInsideHashLiteralBraces:
   EnforcedStyle: no_space
 
 Style/AndOr:
@@ -22,7 +24,7 @@ Style/AndOr:
 Style/AsciiComments:
   Enabled: false
 
-Style/AsciiIdentifiers:
+Naming/AsciiIdentifiers:
   Enabled: false
 
 Style/EmptyCaseCondition:
@@ -43,3 +45,6 @@ Metrics/CyclomaticComplexity:
 
 Metrics/MethodLength:
   Max: 14
+
+Gemspec/OrderedDependencies:
+  Enabled: false
