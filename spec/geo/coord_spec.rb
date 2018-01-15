@@ -150,6 +150,10 @@ describe Geo::Coord do
       c.lats.should be_close(16, 0.01)
       c.lath.should == 'S'
       c.latdms(true).should == [-c.latd, c.latm, c.lats]
+
+      # Larger values
+      c = Geo::Coord.new(22.2, 33.3)
+      c.lats.should == 0
     end
 
     it 'decomposes longitude to d, m, s, h' do

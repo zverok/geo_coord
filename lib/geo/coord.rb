@@ -356,7 +356,7 @@ module Geo
 
     # Returns latitude seconds (unsigned float).
     def lats
-      (lat.abs * 3600) % 3600
+      (lat.abs * 3600) % 60
     end
 
     # Returns latitude hemisphere (upcase letter 'N' or 'S').
