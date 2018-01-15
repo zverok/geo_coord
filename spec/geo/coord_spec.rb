@@ -109,6 +109,10 @@ describe Geo::Coord do
         Geo::Coord.new(latd: 50, latm: 0, lats: 16, lath: 'N',
                        lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
 
+      # TODO:
+      # Geo::Coord.parse_dms(%{22°12'00" 33°18'00"}).should ==
+      #   Geo::Coord.new(latd: 22, latm: 12, lngd: 33, lngm: 18)
+
       lambda{Geo::Coord.parse_dms('50 36 80')}.should raise_error(ArgumentError)
     end
 

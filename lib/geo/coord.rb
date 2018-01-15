@@ -583,17 +583,15 @@ module Geo
 
     private
 
+    LAT_RANGE_ERROR = 'Expected latitude to be between -90 and 90, %p received'.freeze
+    LNG_RANGE_ERROR = 'Expected longitude to be between -180 and 180, %p received'.freeze
+
     def _init(lat, lng)
       lat = lat.to_f
       lng = lng.to_f
 
-      unless (-90..90).cover?(lat)
-        raise ArgumentError, "Expected latitude to be between -90 and 90, #{lat} received"
-      end
-
-      unless (-180..180).cover?(lng)
-        raise ArgumentError, "Expected longitude to be between -180 and 180, #{lng} received"
-      end
+      raise ArgumentError, LAT_RANGE_ERROR % lat unless (-90..90).cover?(lat)
+      raise ArgumentError, LNG_RANGE_ERROR % lng unless (-180..180).cover?(lng)
 
       @lat = lat
       @lng = lng

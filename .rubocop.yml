@@ -1,3 +1,5 @@
+inherit_from: .rubocop_todo.yml
+
 AllCops:
   Include:
     - 'lib/**/*'
@@ -47,4 +49,7 @@ Metrics/MethodLength:
   Max: 14
 
 Gemspec/OrderedDependencies:
+  Enabled: false
+
+Style/FormatStringToken:
   Enabled: false
