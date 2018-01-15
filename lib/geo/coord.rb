@@ -1,3 +1,5 @@
+require 'bigdecimal'
+
 # Geo::Coord is Ruby's library for handling [lat, lng] pairs of
 # geographical coordinates. It provides most of basic functionality
 # you may expect (storing and representing coordinate pair), as well
@@ -587,8 +589,8 @@ module Geo
     LNG_RANGE_ERROR = 'Expected longitude to be between -180 and 180, %p received'.freeze
 
     def _init(lat, lng)
-      lat = lat.to_f
-      lng = lng.to_f
+      lat = BigDecimal(lat.to_f, 10)
+      lng = BigDecimal(lng.to_f, 10)
 
       raise ArgumentError, LAT_RANGE_ERROR % lat unless (-90..90).cover?(lat)
       raise ArgumentError, LNG_RANGE_ERROR % lng unless (-180..180).cover?(lng)
