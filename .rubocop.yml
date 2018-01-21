@@ -35,6 +35,7 @@ Style/FormatString:
 
 Style/PercentLiteralDelimiters:
   PreferredDelimiters:
+    default: "{}"
     "%i": "[]"
 
 Metrics/ClassLength:

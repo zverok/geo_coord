@@ -446,7 +446,8 @@ module Geo
     #    g.inspect  # => "#<Geo::Coord 50.004444,36.231389>"
     #
     def inspect
-      '#<%s %s>' % [self.class.name, to_s]
+      # '#<%s %s>' % [self.class.name, to_s]
+      strfcoord(%{#<#{self.class.name} %latd°%latm'%lats"%lath %lngd°%lngm'%lngs"%lngh>})
     end
 
     # Returns a string representing coordinates.

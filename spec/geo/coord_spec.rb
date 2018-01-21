@@ -182,7 +182,7 @@ describe Geo::Coord do
   context 'simple conversions' do
     it 'is inspectable' do
       c = Geo::Coord.new(50.004444, 36.231389)
-      c.inspect.should == '#<Geo::Coord 50.004444,36.231389>'
+      c.inspect.should == %{#<Geo::Coord 50°0'16"N 36°13'53"E>}
     end
 
     it 'is convertible to string' do
