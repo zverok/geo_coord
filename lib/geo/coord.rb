@@ -487,17 +487,17 @@ module Geo
 
     # @private
     DIRECTIVES = { # :nodoc:
+      /%(#{FLOATUFLAGS})?lats/ => proc { |m| "%<lats>#{m[1] || '.0'}f" },
+      '%latm' => '%<latm>i',
       /%(#{INTFLAGS})?latds/ => proc { |m| "%<latds>#{m[1]}i" },
       '%latd' => '%<latd>i',
-      '%latm' => '%<latm>i',
-      /%(#{FLOATUFLAGS})?lats/ => proc { |m| "%<lats>#{m[1] || '.0'}f" },
       '%lath' => '%<lath>s',
       /%(#{FLOATFLAGS})?lat/ => proc { |m| "%<lat>#{m[1]}f" },
 
+      /%(#{FLOATUFLAGS})?lngs/ => proc { |m| "%<lngs>#{m[1] || '.0'}f" },
+      '%lngm' => '%<lngm>i',
       /%(#{INTFLAGS})?lngds/ => proc { |m| "%<lngds>#{m[1]}i" },
       '%lngd' => '%<lngd>i',
-      '%lngm' => '%<lngm>i',
-      /%(#{FLOATUFLAGS})?lngs/ => proc { |m| "%<lngs>#{m[1] || '.0'}f" },
       '%lngh' => '%<lngh>s',
       /%(#{FLOATFLAGS})?lng/ => proc { |m| "%<lng>#{m[1]}f" }
     }.freeze
@@ -542,9 +542,19 @@ module Geo
       DIRECTIVES.reduce(formatstr) do |memo, (from, to)|
         memo.gsub(from) do
           to = to.call(Regexp.last_match) if to.is_a?(Proc)
-          to % h
+          res = to % h
+          res, carrymin = guard_seconds(to, res)
+          h[carrymin] += 1 if carrymin
+          res
         end
       end
+    end
+
+    def guard_seconds(pattern, result)
+      m = pattern.match(/<(lat|lng)s>/)
+      return result unless m && result.start_with?('60')
+      carry = "#{m[1]}m".to_sym
+      [pattern % {lats: 0, lngs: 0}, carry]
     end
 
     # Calculates distance to +other+ in SI units (meters). Vincenty

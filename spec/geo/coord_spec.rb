@@ -271,6 +271,16 @@ describe Geo::Coord do
       pos.strfcoord(%q{%latd %latm' %lats" %lath, %lngd %lngm' %lngs" %lngh}).should ==
         %q{50 0' 16" N, 36 13' 53" E}
     end
+
+    it 'can carry' do
+      pos = Geo::Coord.new(0.033333, 91.333333)
+      pos.strfcoord('%latd %latm %lats, %lngd %lngm %lngs').should ==
+        '0 2 0, 91 20 0'
+      pos.strfcoord('%latd %latm %.02lats, %lngd %lngm %.02lngs').should ==
+        '0 2 0.00, 91 20 0.00'
+      pos.strfcoord('%latd %latm %.03lats, %lngd %lngm %.03lngs').should ==
+        '0 1 59.999, 91 19 59.999'
+    end
   end
 
   context :strpcoord do
