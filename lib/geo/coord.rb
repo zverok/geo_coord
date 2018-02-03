@@ -21,48 +21,48 @@ module Geo
   #
   #    # From lat/lng pair:
   #    g = Geo::Coord.new(50.004444, 36.231389)
-  #    # => #<Geo::Coord 50.004444,36.231389>
+  #    # => #<Geo::Coord 50°0'16"N 36°13'53"E>
   #
   #    # Or using keyword arguments form:
   #    g = Geo::Coord.new(lat: 50.004444, lng: 36.231389)
-  #    # => #<Geo::Coord 50.004444,36.231389>
+  #    # => #<Geo::Coord 50°0'16"N 36°13'53"E>
   #
   #    # Keyword arguments also allow creation of Coord from components:
   #    g = Geo::Coord.new(latd: 50, latm: 0, lats: 16, lath: 'N', lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
-  #    # => #<Geo::Coord 50.004444,36.231389>
+  #    # => #<Geo::Coord 50°0'16"N 36°13'53"E>
   #
   # For parsing API responses you'd like to use +from_h+,
   # which accepts String and Symbol keys, any letter case,
   # and knows synonyms (lng/lon/longitude):
   #
   #    g = Geo::Coord.from_h('LAT' => 50.004444, 'LON' => 36.231389)
-  #    # => #<Geo::Coord 50.004444,36.231389>
+  #    # => #<Geo::Coord 50°0'16"N 36°13'53"E>
   #
   # For math, you'd probably like to be able to initialize
   # Coord with radians rather than degrees:
   #
   #    g = Geo::Coord.from_rad(0.8727421884291233, 0.6323570306208558)
-  #    # => #<Geo::Coord 50.004444,36.231389>
+  #    # => #<Geo::Coord 50°0'16"N 36°13'53"E>
   #
   # There's also family of parsing methods, with different applicability:
   #
   #    # Tries to parse (lat, lng) pair:
   #    g = Geo::Coord.parse_ll('50.004444, 36.231389')
-  #    # => #<Geo::Coord 50.004444,36.231389>
+  #    # => #<Geo::Coord 50°0'16"N 36°13'53"E>
   #
   #    # Tries to parse degrees/minutes/seconds:
   #    g = Geo::Coord.parse_dms('50° 0′ 16″ N, 36° 13′ 53″ E')
-  #    # => #<Geo::Coord 50.004444,36.231389>
+  #    # => #<Geo::Coord 50°0'16"N 36°13'53"E>
   #
   #    # Tries to do best guess:
   #    g = Geo::Coord.parse('50.004444, 36.231389')
-  #    # => #<Geo::Coord 50.004444,36.231389>
+  #    # => #<Geo::Coord 50°0'16"N 36°13'53"E>
   #    g = Geo::Coord.parse('50° 0′ 16″ N, 36° 13′ 53″ E')
-  #    # => #<Geo::Coord 50.004444,36.231389>
+  #    # => #<Geo::Coord 50°0'16"N 36°13'53"E>
   #
-  #    # Allows user to provide pattern (see below for pattern language):
+  #    # Allows user to provide pattern:
   #    g = Geo::Coord.strpcoord('50.004444, 36.231389', '%lat, %lng')
-  #    # => #<Geo::Coord 50.004444,36.231389>
+  #    # => #<Geo::Coord 50°0'16"N 36°13'53"E>
   #
   # Having Coord object, you can get its properties:
   #
@@ -119,7 +119,7 @@ module Geo
       #   and longitude ("lng", "lon", "long", "longitude").
       #
       #    g = Geo::Coord.from_h('LAT' => 50.004444, longitude: 36.231389)
-      #    # => #<Geo::Coord 50.004444,36.231389>
+      #    # => #<Geo::Coord 50°0'16"N 36°13'53"E>
       #
       def from_h(hash)
         h = hash.map { |k, v| [k.to_s.downcase.to_sym, v] }.to_h
@@ -134,7 +134,7 @@ module Geo
       # Creates Coord from φ and λ (latitude and longitude in radians).
       #
       #    g = Geo::Coord.from_rad(0.8727421884291233, 0.6323570306208558)
-      #    # => #<Geo::Coord 50.004444,36.231389>
+      #    # => #<Geo::Coord 50°0'16"N 36°13'53"E>
       #
       def from_rad(phi, la)
         new(phi * 180 / Math::PI, la * 180 / Math::PI)
@@ -184,7 +184,7 @@ module Geo
       # Understands several types of separators/spaces between values.
       #
       #    Geo::Coord.parse_ll('-50.004444 +36.231389')
-      #    # => #<Geo::Coord -50.004444,36.231389>
+      #    # => #<Geo::Coord 50°0'16"S 36°13'53"E>
       #
       # If parse_ll is not wise enough to understand your data, consider
       # using ::strpcoord.
@@ -202,7 +202,7 @@ module Geo
       # explicit hemisphere and no-hemisphere (signed degrees) formats.
       #
       #    Geo::Coord.parse_dms('50°0′16″N 36°13′53″E')
-      #    # => #<Geo::Coord 50.004444,36.231389>
+      #    # => #<Geo::Coord 50°0'16"N 36°13'53"E>
       #
       # If parse_dms is not wise enough to understand your data, consider
       # using ::strpcoord.
@@ -221,9 +221,9 @@ module Geo
       # known form).
       #
       #    Geo::Coord.parse('-50.004444 +36.231389')
-      #    # => #<Geo::Coord -50.004444,36.231389>
+      #    # => #<Geo::Coord 50°0'16"S 36°13'53"E>
       #    Geo::Coord.parse('50°0′16″N 36°13′53″E')
-      #    # => #<Geo::Coord 50.004444,36.231389>
+      #    # => #<Geo::Coord 50°0'16"N 36°13'53"E>
       #
       # If you know exact form in which coordinates are
       # provided, it may be wider to consider parse_ll, parse_dms or
@@ -305,19 +305,19 @@ module Geo
     # key +lat+ and partial longitude keys +lngd+, +lngm+ and so on.
     #
     #    g = Geo::Coord.new(50.004444, 36.231389)
-    #    # => #<Geo::Coord 50.004444,36.231389>
+    #    # => #<Geo::Coord 50°0'16"N 36°13'53"E>
     #
     #    # Or using keyword arguments form:
     #    g = Geo::Coord.new(lat: 50.004444, lng: 36.231389)
-    #    # => #<Geo::Coord 50.004444,36.231389>
+    #    # => #<Geo::Coord 50°0'16"N 36°13'53"E>
     #
     #    # Keyword arguments also allow creation of Coord from components:
     #    g = Geo::Coord.new(latd: 50, latm: 0, lats: 16, lath: 'N', lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
-    #    # => #<Geo::Coord 50.004444,36.231389>
+    #    # => #<Geo::Coord 50°0'16"N 36°13'53"E>
     #
     #    # Providing defaults:
     #    g = Geo::Coord.new(lat: 50.004444)
-    #    # => #<Geo::Coord 50.004444,0.000000>
+    #    # => #<Geo::Coord 50°0'16"N 0°0'0"W>
     #
     def initialize(lat = nil, lng = nil, **opts)
       @globe = Globes::Earth.instance
@@ -392,14 +392,14 @@ module Geo
     #    # Nothern hemisphere:
     #    g = Geo::Coord.new(50.004444, 36.231389)
     #
-    #    g.latdms        # => [50, 0, 15.998400000011316, "N"]
-    #    g.latdms(true)  # => [50, 0, 15.998400000011316]
+    #    g.latdms        # => [50, 0, 15.9984, "N"]
+    #    g.latdms(true)  # => [50, 0, 15.9984]
     #
     #    # Southern hemisphere:
     #    g = Geo::Coord.new(-50.004444, 36.231389)
     #
-    #    g.latdms        # => [50, 0, 15.998400000011316, "S"]
-    #    g.latdms(true)  # => [-50, 0, 15.998400000011316]
+    #    g.latdms        # => [50, 0, 15.9984, "S"]
+    #    g.latdms(true)  # => [-50, 0, 15.9984]
     #
     def latdms(nohemisphere = false)
       nohemisphere ? [latsign * latd, latm, lats] : [latd, latm, lats, lath]
@@ -411,14 +411,14 @@ module Geo
     #    # Eastern hemisphere:
     #    g = Geo::Coord.new(50.004444, 36.231389)
     #
-    #    g.lngdms        # => [36, 13, 53.00040000000445, "E"]
-    #    g.lngdms(true)  # => [36, 13, 53.00040000000445]
+    #    g.lngdms        # => [36, 13, 53.0004, "E"]
+    #    g.lngdms(true)  # => [36, 13, 53.0004]
     #
     #    # Western hemisphere:
     #    g = Geo::Coord.new(50.004444, 36.231389)
     #
-    #    g.lngdms        # => [36, 13, 53.00040000000445, "E"]
-    #    g.lngdms(true)  # => [-36, 13, 53.00040000000445]
+    #    g.lngdms        # => [36, 13, 53.0004, "E"]
+    #    g.lngdms(true)  # => [-36, 13, 53.0004]
     #
     def lngdms(nohemisphere = false)
       nohemisphere ? [lngsign * lngd, lngm, lngs] : [lngd, lngm, lngs, lngh]
@@ -452,18 +452,28 @@ module Geo
 
     # Returns a string representing coordinates.
     #
-    #    g.to_s   # => "50.004444,36.231389"
+    #    g.to_s              # => "50°0'16\"N 36°13'53\"E"
+    #    g.to_s(dms: false)  # => "50.004444,36.231389"
     #
-    def to_s
-      '%f,%f' % [lat, lng]
+    def to_s(dms: true)
+      format = dms ? %{%latd°%latm'%lats"%lath %lngd°%lngm'%lngs"%lngh} : '%lat,%lng'
+      strfcoord(format)
     end
 
     # Returns a two-element array of latitude and longitude.
     #
-    #    g.to_a   # => [50.004444, 36.231389]
+    #    g.latlng   # => [50.004444, 36.231389]
     #
-    def to_a
+    def latlng
       [lat, lng]
+    end
+
+    # Returns a two-element array of longitude and latitude (reverse order to +latlng+).
+    #
+    #    g.lnglat   # => [36.231389, 50.004444]
+    #
+    def lnglat
+      [lng, lat]
     end
 
     # Returns hash of latitude and longitude. You can provide your keys
@@ -536,6 +546,13 @@ module Geo
     #    g.strfcoord("%latd°%latm'%lath -- %lngd°%lngm'%lngh")
     #    # => "50°0'N -- 36°13'E"
     #
+    # +strfcoord+ handles seconds rounding implicitly:
+    #
+    #    pos = Geo::Coord.new(0.033333, 91.333333)
+    #    pos.lats # => 0.599988e2
+    #    pos.strfcoord('%latd %latm %.05lats') # => "0 1 59.99880"
+    #    pos.strfcoord('%latd %latm %lats')  # => "0 2 0"
+    #
     def strfcoord(formatstr)
       h = full_hash
 
@@ -548,13 +565,6 @@ module Geo
           res
         end
       end
-    end
-
-    def guard_seconds(pattern, result)
-      m = pattern.match(/<(lat|lng)s>/)
-      return result unless m && result.start_with?('60')
-      carry = "#{m[1]}m".to_sym
-      [pattern % {lats: 0, lngs: 0}, carry]
     end
 
     # Calculates distance to +other+ in SI units (meters). Vincenty
@@ -587,7 +597,7 @@ module Geo
     #
     #    kharkiv = Geo::Coord.new(50.004444, 36.231389)
     #    kharkiv.endpoint(410_211, 280)
-    #    # => #<Geo::Coord 50.505975,30.531283>
+    #    # => #<Geo::Coord 50°30'22"N 30°31'53"E>
     #
     def endpoint(distance, azimuth)
       phi2, la2 = @globe.direct(phi, la, distance, deg2rad(azimuth))
@@ -633,6 +643,13 @@ module Geo
       return 1 unless h
       hemishperes[h] or
         raise ArgumentError, "Unidentified hemisphere: #{h}"
+    end
+
+    def guard_seconds(pattern, result)
+      m = pattern.match(/<(lat|lng)s>/)
+      return result unless m && result.start_with?('60')
+      carry = "#{m[1]}m".to_sym
+      [pattern % {lats: 0, lngs: 0}, carry]
     end
 
     def latsign

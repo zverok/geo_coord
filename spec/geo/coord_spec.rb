@@ -187,15 +187,18 @@ describe Geo::Coord do
 
     it 'is convertible to string' do
       c = Geo::Coord.new(50.004444, 36.231389)
-      c.to_s.should == '50.004444,36.231389'
+      c.to_s.should == %{50°0'16"N 36°13'53"E}
+      c.to_s(dms: false).should == '50.004444,36.231389'
 
       c = Geo::Coord.new(-50.004444, -36.231389)
-      c.to_s.should == '-50.004444,-36.231389'
+      c.to_s.should == %{50°0'16"S 36°13'53"W}
+      c.to_s(dms: false).should == '-50.004444,-36.231389'
     end
 
     it 'is convertible to array' do
       c = Geo::Coord.new(50.004444, 36.231389)
-      c.to_a.should == [50.004444, 36.231389]
+      c.latlng.should == [50.004444, 36.231389]
+      c.lnglat.should == [36.231389, 50.004444]
     end
 
     it 'is convertible to hash' do

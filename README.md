@@ -40,11 +40,118 @@ I still have a small hope it would be part of stdlib once, that's why I
 preserve the style of specs (outdated rspec, but compatible with mspec used
 for standard library) and docs (yard in RDoc-compatibility mode).
 
+## Installation
+
+Now when it is a gem, just do your usual `gem install geo_coord` or add
+`gem "geo_coord", require: "geo/coord"` to your Gemfile.
+
+## Usage
+
+### Creation
+
+```ruby
+require 'geo/coord'
+
+# From lat/lng pair:
+g = Geo::Coord.new(50.004444, 36.231389)
+# => #<Geo::Coord 50°0'16"N 36°13'53"E>
+
+# Or using keyword arguments form:
+g = Geo::Coord.new(lat: 50.004444, lng: 36.231389)
+# => #<Geo::Coord 50°0'16"N 36°13'53"E>
+
+# Keyword arguments also allow creation of Coord from components:
+g = Geo::Coord.new(latd: 50, latm: 0, lats: 16, lath: 'N', lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
+# => #<Geo::Coord 50°0'16"N 36°13'53"E>
+```
+
+For parsing API responses you'd like to use `from_h`,
+which accepts String and Symbol keys, any letter case,
+and knows synonyms (lng/lon/longitude):
+
+```ruby
+g = Geo::Coord.from_h('LAT' => 50.004444, 'LON' => 36.231389)
+# => #<Geo::Coord 50°0'16"N 36°13'53"E>
+```
+
+For math, you'd probably like to be able to initialize
+Coord with radians rather than degrees:
+
+```ruby
+g = Geo::Coord.from_rad(0.8727421884291233, 0.6323570306208558)
+# => #<Geo::Coord 50°0'16"N 36°13'53"E>
+```
+
+There's also family of string parsing methods, with different
+applicability:
+
+```ruby
+# Tries to parse (lat, lng) pair:
+g = Geo::Coord.parse_ll('50.004444, 36.231389')
+# => #<Geo::Coord 50°0'16"N 36°13'53"E>
+
+# Tries to parse degrees/minutes/seconds:
+g = Geo::Coord.parse_dms('50° 0′ 16″ N, 36° 13′ 53″ E')
+# => #<Geo::Coord 50°0'16"N 36°13'53"E>
+
+# Tries to do best guess:
+g = Geo::Coord.parse('50.004444, 36.231389')
+# => #<Geo::Coord 50°0'16"N 36°13'53"E>
+g = Geo::Coord.parse('50° 0′ 16″ N, 36° 13′ 53″ E')
+# => #<Geo::Coord 50°0'16"N 36°13'53"E>
+
+# Allows user to provide pattern:
+g = Geo::Coord.strpcoord('50.004444, 36.231389', '%lat, %lng')
+# => #<Geo::Coord 50°0'16"N 36°13'53"E>
+```
+
+[Pattern language description](http://www.rubydoc.info/gems/geo_coord/Geo/Coord#strpcoord-class_method)
+
+### Examining the object
+
+Having Coord object, you can get its properties:
+
+```ruby
+g = Geo::Coord.new(50.004444, 36.231389)
+g.lat # => 50.004444
+g.latd # => 50 -- latitude degrees
+g.lath # => N -- latitude hemisphere
+g.lngh # => E -- longitude hemishpere
+g.phi  # => 0.8727421884291233 -- longitude in radians
+g.latdms # => [50, 0, 15.998400000011316, "N"]
+# ...and so on
+```
+
+### Formatting and converting
+
+```ruby
+g.to_s              # => "50°0'16\"N 36°13'53\"E"
+g.to_s(dms: false)  # => "50.004444,36.231389"
+g.strfcoord('%latd°%latm′%lats″%lath %lngd°%lngm′%lngs″%lngh')
+# => "50°0′16″N 36°13′53″E"
+
+g.to_h(lat: 'LAT', lng: 'LON') # => {'LAT'=>50.004444, 'LON'=>36.231389}
+```
+
+### Geodesy math
+
+```ruby
+kharkiv = Geo::Coord.new(50.004444, 36.231389)
+kyiv = Geo::Coord.new(50.45, 30.523333)
+
+kharkiv.distance(kyiv) # => 410211.22377421556
+kharkiv.azimuth(kyiv) # => 279.12614358262067
+kharkiv.endpoint(410_211, 280) # => #<Geo::Coord 50°30'22"N 30°31'53"E>
+```
+
+[Full API Docs](http://www.rubydoc.info/gems/geo_coord)
+
 ## Design decisions
 
 While designing `Geo` library, my reference point was standard `Time`
 class (and, to lesser extent, `Date`/`DateTime`). It has these
 responsibilities:
+
 * stores data in simple internal form;
 * helps to parse and format data to and from strings;
 * provides easy access to logical components of data;
@@ -71,12 +178,25 @@ metres for distances (as they are SI unit) and degrees for azimuth.
 Latitude and longitude are stored in degrees, but radians values accessors
 are provided (being widely used in geodesy math).
 
+**Internal storage**: Since ver 0.0.2, latitude and longitude stored
+internally as an instances of `BigDecimal`. While having some memory
+and performance downsides, this datatype provides _correctness_ of
+conversions between floating point & deg-min-sec representations:
+
+```ruby
+# 33.3 should be 33°18'00"
+# Float:
+33.3 * 60 % 60 # => 17.999999999999773 minutes
+# BigDecimal
+BigDecimal(33.3, 10) * 60 % 60 # => 0.18e2
+```
+
 All coordinates and calculations are thought to be in
 [WGS 84](https://en.wikipedia.org/wiki/World_Geodetic_System#A_new_World_Geodetic_System:_WGS_84)
 coordinates reference system, being current standard for maps and GPS.
 
 There's introduced **a concept of globe** used internally for calculations.
-Only generic (sphere) and Earth globes are implemented, but for 2016 I
+Only generic (sphere) and Earth globes are implemented, but for 2010th I
 feel like the current design of basic types should take in consideration
 possibility of writing Ruby scripts for Mars maps analysis. Only one
 geodesy formula is implemented (Vincenty, generally considered one of
@@ -86,109 +206,6 @@ unnecessary to provide a user with geodesy formulae options.
 No **map projection** math was added into the current gem, but it
 may be a good direction for further work. No **elevation** data considered
 either.
-
-## Installation
-
-Now when it is a gem, just do your usual `gem install geo_coord` or add
-`gem "geo_coord", require: "geo/coord"` to your Gemfile.
-
-## Usage
-
-### Creation
-
-```ruby
-# From lat/lng pair:
-g = Geo::Coord.new(50.004444, 36.231389)
-# => #<Geo::Coord 50.004444,36.231389>
-
-# Or using keyword arguments form:
-g = Geo::Coord.new(lat: 50.004444, lng: 36.231389)
-# => #<Geo::Coord 50.004444,36.231389>
-
-# Keyword arguments also allow creation of Coord from components:
-g = Geo::Coord.new(latd: 50, latm: 0, lats: 16, lath: 'N', lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
-# => #<Geo::Coord 50.004444,36.231389>
-```
-
-For parsing API responses you'd like to use `from_h`,
-which accepts String and Symbol keys, any letter case,
-and knows synonyms (lng/lon/longitude):
-
-```ruby
-g = Geo::Coord.from_h('LAT' => 50.004444, 'LON' => 36.231389)
-# => #<Geo::Coord 50.004444,36.231389>
-```
-
-For math, you'd probably like to be able to initialize
-Coord with radians rather than degrees:
-
-```ruby
-g = Geo::Coord.from_rad(0.8727421884291233, 0.6323570306208558)
-# => #<Geo::Coord 50.004444,36.231389>
-```
-
-There's also family of string parsing methods, with different
-applicability:
-
-```ruby
-# Tries to parse (lat, lng) pair:
-g = Geo::Coord.parse_ll('50.004444, 36.231389')
-# => #<Geo::Coord 50.004444,36.231389>
-
-# Tries to parse degrees/minutes/seconds:
-g = Geo::Coord.parse_dms('50° 0′ 16″ N, 36° 13′ 53″ E')
-# => #<Geo::Coord 50.004444,36.231389>
-
-# Tries to do best guess:
-g = Geo::Coord.parse('50.004444, 36.231389')
-# => #<Geo::Coord 50.004444,36.231389>
-g = Geo::Coord.parse('50° 0′ 16″ N, 36° 13′ 53″ E')
-# => #<Geo::Coord 50.004444,36.231389>
-
-# Allows user to provide pattern:
-g = Geo::Coord.strpcoord('50.004444, 36.231389', '%lat, %lng')
-# => #<Geo::Coord 50.004444,36.231389>
-```
-
-[Pattern language description](http://www.rubydoc.info/gems/geo_coord/Geo/Coord#strpcoord-class_method)
-
-### Examining the object
-
-Having Coord object, you can get its properties:
-
-```ruby
-g = Geo::Coord.new(50.004444, 36.231389)
-g.lat # => 50.004444
-g.latd # => 50 -- latitude degrees
-g.lath # => N -- latitude hemisphere
-g.lngh # => E -- longitude hemishpere
-g.phi  # => 0.8727421884291233 -- longitude in radians
-g.latdms # => [50, 0, 15.998400000011316, "N"]
-# ...and so on
-```
-
-### Formatting and converting
-
-```ruby
-g.to_s # => "50.004444,36.231389"
-g.strfcoord('%latd°%latm′%lats″%lath %lngd°%lngm′%lngs″%lngh')
-# => "50°0′16″N 36°13′53″E"
-
-g.to_h(lat: 'LAT', lng: 'LON') # => {'LAT'=>50.004444, 'LON'=>36.231389}
-```
-
-### Geodesy math
-
-```ruby
-kharkiv = Geo::Coord.new(50.004444, 36.231389)
-kyiv = Geo::Coord.new(50.45, 30.523333)
-
-kharkiv.distance(kyiv) # => 410211.22377421556
-kharkiv.azimuth(kyiv) # => 279.12614358262067
-kharkiv.endpoint(410_211, 280) # => #<Geo::Coord 50.505975,30.531283>
-```
-
-[Full API Docs](http://www.rubydoc.info/gems/geo_coord)
 
 ## Author
 
