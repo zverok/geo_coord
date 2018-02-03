@@ -10,6 +10,7 @@ AllCops:
     - 'spec/**/*'
     - 'vendor/**/*'
     - 'tmp/*'
+    - '*.gemspec'
   DisplayCopNames: true
 
 Metrics/LineLength:
@@ -39,7 +40,7 @@ Style/PercentLiteralDelimiters:
     "%i": "[]"
 
 Metrics/ClassLength:
-  Max: 260
+  Max: 300
 
 Metrics/CyclomaticComplexity:
   Max: 7
