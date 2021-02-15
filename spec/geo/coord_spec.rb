@@ -1,318 +1,343 @@
-require File.expand_path('../../spec_helper', __FILE__)
+# frozen_string_literal: true
 
-describe Geo::Coord do
-  context :initialize do
-    it 'is initialized by (lat, lng)' do
-      c = Geo::Coord.new(50.004444, 36.231389)
-      c.lat.should == 50.004444
-      c.latitude.should == 50.004444
-      c.phi.should == c.lat * Math::PI / 180
+RSpec.describe Geo::Coord do
+  def coord(*args)
+    Geo::Coord.new(*args)
+  end
 
-      c.lng.should == 36.231389
-      c.lon.should == 36.231389
-      c.longitude.should == 36.231389
-      c.la.should == c.lng * Math::PI / 180
+  describe '#initialize' do
+    subject { described_class.method(:new) }
+
+    its_call(50.004444, 36.231389) {
+      is_expected.to ret have_attributes(
+        lat: 50.004444,
+        latitude: 50.004444,
+        phi: BigDecimal('50.004444') * Math::PI / 180,
+        lng: 36.231389,
+        lon: 36.231389,
+        longitude: 36.231389,
+        la: BigDecimal('36.231389') * Math::PI / 180
+      )
+    }
+
+    its_call(100, 36.231389) { is_expected.to raise_error(ArgumentError) }
+    its_call(50, 360) { is_expected.to raise_error(ArgumentError) }
+
+    its_call(lat: 50.004444, lng: 36.231389) {
+      is_expected.to ret have_attributes(lat: 50.004444, lng: 36.231389)
+    }
+
+    its_call(lat: 50.004444) {
+      is_expected.to ret have_attributes(lat: 50.004444, lng: 0)
+    }
+
+    its_call(lng: 36.231389) {
+      is_expected.to ret have_attributes(lat: 0, lng: 36.231389)
+    }
+
+    its_call(latd: 50, lngd: 36) { is_expected.to ret coord(50, 36) }
+    its_call(latd: 50, lath: 'S', lngd: 36, lngh: 'W') { is_expected.to ret coord(-50, -36) }
+
+    its_call(latd: 50, latm: 0, lats: 16, lngd: 36, lngm: 13, lngs: 53) {
+      is_expected.to ret have_attributes(lat: BigDecimal('50.00444444'), lng: BigDecimal('36.23138889'))
+    }
+
+    its_call(latd: 50, latm: 0, lats: 16) {
+      is_expected.to ret have_attributes(
+        lat: BigDecimal('50.00444444'),
+        lng: 0
+      )
+    }
+
+    its_call(lngd: 36, lngm: 13, lngs: 53) {
+      is_expected.to ret have_attributes(
+        lat: 0,
+        lng: BigDecimal('36.23138889')
+      )
+    }
+
+    its_call(lngd: 37, lngm: 30, lngs: 11.84) {
+      is_expected.to ret have_attributes(
+        lng: BigDecimal('37.50328889')
+      )
+    }
+
+    its_call { is_expected.to raise_error(ArgumentError) }
+  end
+
+  describe '.from_h' do
+    subject { described_class.method(:from_h) }
+
+    its_call(lat: 50.004444, lng: 36.231389) { is_expected.to ret coord(50.004444, 36.231389) }
+
+    its_call(latitude: 50.004444, longitude: 36.231389) { is_expected.to ret coord(50.004444, 36.231389) }
+
+    its_call(lat: 50.004444, lon: 36.231389) { is_expected.to ret coord(50.004444, 36.231389) }
+
+    its_call('lat' => 50.004444, 'lng' => 36.231389) { is_expected.to ret coord(50.004444, 36.231389) }
+    its_call('Lat' => 50.004444, 'LNG' => 36.231389) { is_expected.to ret coord(50.004444, 36.231389) }
+  end
+
+  describe '.parse_ll' do
+    subject { described_class.method(:parse_ll) }
+
+    its_call('50.004444, 36.231389') { is_expected.to ret coord(50.004444, 36.231389) }
+    its_call('50.004444,36.231389') { is_expected.to ret coord(50.004444, 36.231389) }
+    its_call('50.004444;36.231389') { is_expected.to ret coord(50.004444, 36.231389) }
+    its_call('50.004444 36.231389') { is_expected.to ret coord(50.004444, 36.231389) }
+    its_call('-50.004444 +36.231389') { is_expected.to ret coord(-50.004444, 36.231389) }
+    its_call('50 36') { is_expected.to ret coord(50, 36) }
+
+    its_call('50 36 80') { is_expected.to raise_error(ArgumentError) }
+    its_call('50.04444') { is_expected.to raise_error(ArgumentError) }
+  end
+
+  describe '.parse_dms' do
+    subject { described_class.method(:parse_dms) }
+
+    its_call(%q{50 0' 16" N, 36 13' 53" E}) {
+      is_expected.to ret coord(latd: 50, latm: 0, lats: 16, lath: 'N',
+                               lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
+    }
+
+    its_call('50°0′16″N 36°13′53″E') {
+      is_expected.to ret coord(latd: 50, latm: 0, lats: 16, lath: 'N',
+                               lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
+    }
+
+    its_call('50°0’16″N 36°13′53″E') {
+      is_expected.to ret coord(latd: 50, latm: 0, lats: 16, lath: 'N',
+                               lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
+    }
+
+    # TODO: its_call(%{22°12'00" 33°18'00"}) { is_expected.to ret coord(latd: 22, latm: 12, lngd: 33, lngm: 18) }
+
+    its_call('50 36 80') { is_expected.to raise_error(ArgumentError) }
+  end
+
+  describe '.parse' do
+    subject { described_class.method(:parse) }
+
+    its_call('50.004444, 36.231389') { is_expected.to ret coord(50.004444, 36.231389) }
+    its_call('50 36') { is_expected.to ret coord(50, 36) }
+    its_call(%q{50 0' 16" N, 36 13' 53" E}) {
+      is_expected.to ret coord(latd: 50, latm: 0, lats: 16, lath: 'N',
+                               lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
+    }
+
+    its_call('50') { is_expected.to ret nil }
+  end
+
+  describe '#lat*' do
+    context 'when in nothern hemisphere' do
+      subject(:point) { coord(50.004444, 36.231389) }
+
+      it {
+        is_expected.to have_attributes(
+          latd: 50,
+          latm: 0,
+          lats: be_within(0.01).of(16),
+          lath: 'N'
+        )
+      }
+
+      describe '#latdms' do
+        subject { point.method(:latdms) }
+
+        its_call { is_expected.to ret [point.latd, point.latm, point.lats, point.lath] }
+        its_call(hemisphere: false) { is_expected.to ret [point.latd, point.latm, point.lats] }
+      end
     end
 
-    it "controls argument ranges" do
-      lambda{Geo::Coord.new(100, 36.231389)}.should raise_error(ArgumentError)
+    context 'when in southern hemisphere' do
+      subject(:point) { coord(-50.004444, 36.231389) }
 
-      lambda{Geo::Coord.new(50, 360)}.should raise_error(ArgumentError)
-    end
+      it {
+        is_expected.to have_attributes(
+          latd: 50,
+          latm: 0,
+          lats: be_within(0.01).of(16),
+          lath: 'S'
+        )
+      }
 
-    it 'is initialized by (lat: , lng:) keyword args' do
-      c = Geo::Coord.new(lat: 50.004444, lng: 36.231389)
-      c.lat.should == 50.004444
-      c.lng.should == 36.231389
+      describe '#latdms' do
+        subject { point.method(:latdms) }
 
-      c = Geo::Coord.new(lat: 50.004444)
-      c.lat.should == 50.004444
-      c.lng.should == 0
-
-      c = Geo::Coord.new(lng: 36.231389)
-      c.lat.should == 0
-      c.lng.should == 36.231389
-    end
-
-    it 'is initialized by d,m,s,h sets' do
-      Geo::Coord.new(latd: 50, lngd: 36).should == Geo::Coord.new(50, 36)
-      Geo::Coord.new(latd: 50, lath: 'S', lngd: 36, lngh: 'W').should == Geo::Coord.new(-50, -36)
-
-      c = Geo::Coord.new(latd: 50, latm: 0, lats: 16,
-                         lngd: 36, lngm: 13, lngs: 53)
-
-      c.lat.should be_close(50.004444, 0.01)
-      c.lng.should be_close(36.231389, 0.01)
-
-      c = Geo::Coord.new(latd: 50, latm: 0, lats: 16)
-      c.lat.should be_close(50.004444, 0.01)
-      c.lng.should == 0
-
-      c = Geo::Coord.new(lngd: 36, lngm: 13, lngs: 53)
-      c.lat.should == 0
-      c.lng.should be_close(36.231389, 0.01)
-    end
-
-    it 'is rasing ArgumentError when arguments are missing' do
-      lambda{Geo::Coord.new()}.should raise_error(ArgumentError)
+        its_call { is_expected.to ret [point.latd, point.latm, point.lats, point.lath] }
+        its_call(hemisphere: false) { is_expected.to ret [-point.latd, point.latm, point.lats] }
+      end
     end
   end
 
-  context :from_h do
-    it 'can be created from hash' do
-      c = Geo::Coord.from_h(lat: 50.004444, lng: 36.231389)
-      c.should == Geo::Coord.new(50.004444, 36.231389)
+  describe '#lng*' do
+    context 'when in eastern hemisphere' do
+      subject(:point) { coord(50.004444, 36.231389) }
+
+      it {
+        is_expected.to have_attributes(
+          lngd: 36,
+          lngm: 13,
+          lngs: be_within(0.01).of(53),
+          lngh: 'E'
+        )
+      }
+
+      describe '#lngdms' do
+        subject { point.method(:lngdms) }
+
+        its_call { is_expected.to ret [point.lngd, point.lngm, point.lngs, point.lngh] }
+        its_call(hemisphere: false) { is_expected.to ret [point.lngd, point.lngm, point.lngs] }
+      end
     end
 
-    it 'supports several variants of keys' do
-      c = Geo::Coord.from_h(latitude: 50.004444, longitude: 36.231389)
-      c.should == Geo::Coord.new(50.004444, 36.231389)
+    context 'when in western hemisphere' do
+      subject(:point) { coord(50.004444, -36.231389) }
 
-      c = Geo::Coord.from_h(lat: 50.004444, lon: 36.231389)
-      c.should == Geo::Coord.new(50.004444, 36.231389)
-    end
+      it {
+        is_expected.to have_attributes(
+          lngd: 36,
+          lngm: 13,
+          lngs: be_within(0.01).of(53),
+          lngh: 'W'
+        )
+      }
 
-    it 'supports string keys and different cases' do
-      c = Geo::Coord.from_h('lat' => 50.004444, 'lng' => 36.231389)
-      c.should == Geo::Coord.new(50.004444, 36.231389)
+      describe '#lngdms' do
+        subject { point.method(:lngdms) }
 
-      c = Geo::Coord.from_h('Lat' => 50.004444, 'LNG' => 36.231389)
-      c.should == Geo::Coord.new(50.004444, 36.231389)
-    end
-  end
-
-  context 'parsers' do
-    it 'parses lng, lat pair' do
-      # ok
-      Geo::Coord.parse_ll('50.004444, 36.231389').should == Geo::Coord.new(50.004444, 36.231389)
-      Geo::Coord.parse_ll('50.004444,36.231389').should == Geo::Coord.new(50.004444, 36.231389)
-      Geo::Coord.parse_ll('50.004444;36.231389').should == Geo::Coord.new(50.004444, 36.231389)
-      Geo::Coord.parse_ll('50.004444 36.231389').should == Geo::Coord.new(50.004444, 36.231389)
-      Geo::Coord.parse_ll('-50.004444 +36.231389').should == Geo::Coord.new(-50.004444, 36.231389)
-      Geo::Coord.parse_ll('50 36').should == Geo::Coord.new(50, 36)
-
-      # not ok
-      lambda{Geo::Coord.parse_ll('50 36 80')}.should raise_error(ArgumentError)
-      lambda{Geo::Coord.parse_ll('50.04444')}.should raise_error(ArgumentError)
-    end
-
-    it 'parses dmsh pairs' do
-      Geo::Coord.parse_dms(%q{50 0' 16" N, 36 13' 53" E}).should ==
-        Geo::Coord.new(latd: 50, latm: 0, lats: 16, lath: 'N',
-                       lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
-
-      Geo::Coord.parse_dms('50°0′16″N 36°13′53″E').should ==
-        Geo::Coord.new(latd: 50, latm: 0, lats: 16, lath: 'N',
-                       lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
-
-      Geo::Coord.parse_dms('50°0’16″N 36°13′53″E').should ==
-        Geo::Coord.new(latd: 50, latm: 0, lats: 16, lath: 'N',
-                       lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
-
-      # TODO:
-      # Geo::Coord.parse_dms(%{22°12'00" 33°18'00"}).should ==
-      #   Geo::Coord.new(latd: 22, latm: 12, lngd: 33, lngm: 18)
-
-      lambda{Geo::Coord.parse_dms('50 36 80')}.should raise_error(ArgumentError)
-    end
-
-    it 'parses most reasonable choice' do
-      Geo::Coord.parse('50.004444, 36.231389').should == Geo::Coord.new(50.004444, 36.231389)
-      Geo::Coord.parse('50 36').should == Geo::Coord.new(50, 36)
-      Geo::Coord.parse(%q{50 0' 16" N, 36 13' 53" E}).should ==
-        Geo::Coord.new(latd: 50, latm: 0, lats: 16, lath: 'N',
-                       lngd: 36, lngm: 13, lngs: 53, lngh: 'E')
-
-      Geo::Coord.parse('50').should be_nil
+        its_call { is_expected.to ret [point.lngd, point.lngm, point.lngs, point.lngh] }
+        its_call(hemisphere: false) { is_expected.to ret [-point.lngd, point.lngm, point.lngs] }
+      end
     end
   end
 
-  context 'comparison' do
-    it 'compares on equality' do
-      c1 = Geo::Coord.new(50.004444, 36.231389)
-      c2 = Geo::Coord.new(50.004444, 36.231389)
-      c3 = Geo::Coord.new(-50.004444, 36.231389)
-      c1.should == c2
-      c1.should_not == c3
+  describe 'simple conversions' do
+    subject(:point) { coord(50.004444, 36.231389) }
+
+    its(:inspect) { is_expected.to eq %{#<Geo::Coord 50°0'16"N 36°13'53"E>} }
+    its(:latlng) { is_expected.to eq  [50.004444, 36.231389] }
+    its(:lnglat) { is_expected.to eq  [36.231389, 50.004444] }
+
+    describe '#to_s' do
+      subject { point.method(:to_s) }
+
+      its_call { is_expected.to ret %{50°0'16"N 36°13'53"E} }
+      its_call(dms: false) { is_expected.to ret '50.004444,36.231389' }
+
+      context 'when negative coordinates' do
+        let(:point) { coord(-50.004444, -36.231389) }
+
+        its_call { is_expected.to ret %{50°0'16"S 36°13'53"W} }
+        its_call(dms: false) { is_expected.to ret '-50.004444,-36.231389' }
+      end
+    end
+
+    describe '#to_h' do
+      subject { point.method(:to_h) }
+
+      its_call { is_expected.to ret({lat: 50.004444, lng: 36.231389}) }
+      its_call(lat: :latitude, lng: :longitude) { is_expected.to ret({latitude: 50.004444, longitude: 36.231389}) }
+
+      its_call(lng: :lon) { is_expected.to ret({lat: 50.004444, lon: 36.231389}) }
+
+      its_call(lat: 'LAT', lng: 'LNG') { is_expected.to ret({'LAT' => 50.004444, 'LNG' => 36.231389}) }
     end
   end
 
-  context 'decomposition' do
-    it 'decomposes latitude to d, m, s, h' do
-      c = Geo::Coord.new(50.004444, 36.231389)
-      c.latd.should == 50
-      c.latm.should == 0
-      c.lats.should be_close(16, 0.01)
-      c.lath.should == 'N'
-      c.latdms.should == [c.latd, c.latm, c.lats, c.lath]
-      c.latdms(true).should == [c.latd, c.latm, c.lats]
+  describe '#strfcoord' do
+    subject { point.method(:strfcoord) }
 
-      # Negative
-      c = Geo::Coord.new(-50.004444, 36.231389)
-      c.latd.should == 50
-      c.latm.should == 0
-      c.lats.should be_close(16, 0.01)
-      c.lath.should == 'S'
-      c.latdms(true).should == [-c.latd, c.latm, c.lats]
+    context 'with positive coordinates' do
+      let(:point) { coord(50.004444, 36.231389) }
 
-      # Larger values
-      c = Geo::Coord.new(22.2, 33.3)
-      c.lats.should == 0
+      its_call('%latd') { is_expected.to ret '50' }
+      its_call('%latm') { is_expected.to ret '0' }
+      its_call('%lats') { is_expected.to ret '16' }
+      its_call('%lath') { is_expected.to ret 'N' }
+      its_call('%lat') { is_expected.to ret '%f' % point.lat }
+
+      its_call('%lngd') { is_expected.to ret '36' }
+      its_call('%lngm') { is_expected.to ret '13' }
+      its_call('%lngs') { is_expected.to ret '53' }
+      its_call('%lngh') { is_expected.to ret 'E' }
+      its_call('%lng') { is_expected.to ret '%f' % point.lng }
+
+      its_call('%+latds') { is_expected.to ret '+50' }
+
+      its_call('%.02lats') { is_expected.to ret '%.02f' % point.lats }
+      its_call('%.04lat') { is_expected.to ret '%.04f' % point.lat }
+      its_call('%+.04lat') { is_expected.to ret '%+.04f' % point.lat }
+      its_call('%+lat') { is_expected.to ret '%+f' % point.lat }
+
+      its_call('%+lngds') { is_expected.to ret '+36' }
+
+      its_call('%.02lngs') { is_expected.to ret '%.02f' % point.lngs }
+      its_call('%.04lng') { is_expected.to ret '%.04f' % point.lng }
+      its_call('%+.04lng') { is_expected.to ret '%+.04f' % point.lng }
+
+      # Just leave the unknown part
+      its_call('%latd %foo') { is_expected.to ret '50 %foo' }
+
+      # All at once
+      its_call(%q{%latd %latm' %lats" %lath, %lngd %lngm' %lngs" %lngh}) {
+        is_expected.to ret %q{50 0' 16" N, 36 13' 53" E}
+      }
     end
 
-    it 'decomposes longitude to d, m, s, h' do
-      c = Geo::Coord.new(50.004444, 36.231389)
-      c.lngd.should == 36
-      c.lngm.should == 13
-      c.lngs.should be_close(53, 0.01)
-      c.lngh.should == 'E'
-      c.lngdms.should == [c.lngd, c.lngm, c.lngs, c.lngh]
-      c.lngdms(true).should == [c.lngd, c.lngm, c.lngs]
+    context 'with negative coordinates' do
+      let(:point) { coord(-50.004444, -36.231389) }
 
-      # Negative
-      c = Geo::Coord.new(50.004444, -36.231389)
-      c.lngd.should == 36
-      c.lngm.should == 13
-      c.lngs.should be_close(53, 0.01)
-      c.lngh.should == 'W'
-      c.lngdms(true).should == [-c.lngd, c.lngm, c.lngs]
-    end
-  end
+      its_call('%latd') { is_expected.to ret '50' }
+      its_call('%latds') { is_expected.to ret '-50' }
 
-  context 'simple conversions' do
-    it 'is inspectable' do
-      c = Geo::Coord.new(50.004444, 36.231389)
-      c.inspect.should == %{#<Geo::Coord 50°0'16"N 36°13'53"E>}
+      its_call('%lath') { is_expected.to ret 'S' }
+
+      its_call('%lat') { is_expected.to ret '%f' % point.lat }
+
+      its_call('%lngd') { is_expected.to ret '36' }
+      its_call('%lngds') { is_expected.to ret '-36' }
+
+      its_call('%lngh') { is_expected.to ret 'W' }
+
+      its_call('%lng') { is_expected.to ret '%f' % point.lng }
+
+      its_call('%+latds') { is_expected.to ret '-50' }
+
+      its_call('%+lngds') { is_expected.to ret '-36' }
     end
 
-    it 'is convertible to string' do
-      c = Geo::Coord.new(50.004444, 36.231389)
-      c.to_s.should == %{50°0'16"N 36°13'53"E}
-      c.to_s(dms: false).should == '50.004444,36.231389'
+    context 'when carry-over required' do
+      let(:point) { coord(0.033333, 91.333333) }
 
-      c = Geo::Coord.new(-50.004444, -36.231389)
-      c.to_s.should == %{50°0'16"S 36°13'53"W}
-      c.to_s(dms: false).should == '-50.004444,-36.231389'
-    end
-
-    it 'is convertible to array' do
-      c = Geo::Coord.new(50.004444, 36.231389)
-      c.latlng.should == [50.004444, 36.231389]
-      c.lnglat.should == [36.231389, 50.004444]
-    end
-
-    it 'is convertible to hash' do
-      c = Geo::Coord.new(50.004444, 36.231389)
-      c.to_h.should == {lat: 50.004444, lng: 36.231389}
-      c.to_h(lat: :latitude, lng: :longitude).should ==
-        {latitude: 50.004444, longitude: 36.231389}
-
-      c.to_h(lng: :lon).should == {lat: 50.004444, lon: 36.231389}
-
-      c.to_h(lat: 'LAT', lng: 'LNG').should ==
-        {'LAT' => 50.004444, 'LNG' => 36.231389}
+      its_call('%latd %latm %lats, %lngd %lngm %lngs') { is_expected.to ret '0 2 0, 91 20 0' }
+      its_call('%latd %latm %.02lats, %lngd %lngm %.02lngs') { is_expected.to ret '0 2 0.00, 91 20 0.00' }
+      its_call('%latd %latm %.03lats, %lngd %lngm %.03lngs') { is_expected.to ret '0 1 59.999, 91 19 59.999' }
     end
   end
 
-  context :strfcoord do
-    it 'renders components' do
-      pos = Geo::Coord.new(50.004444, 36.231389)
-      neg = Geo::Coord.new(-50.004444, -36.231389)
+  describe '#strpcoord' do
+    subject { described_class.method(:strpcoord) }
 
-      pos.strfcoord('%latd').should == '50'
-      neg.strfcoord('%latd').should == '50'
-      neg.strfcoord('%latds').should == '-50'
+    its_call('50.004444, 36.231389', '%lat, %lng') {
+      is_expected.to ret coord(lat: 50.004444, lng: 36.231389)
+    }
 
-      pos.strfcoord('%latm').should == '0'
-      pos.strfcoord('%lats').should == '16'
-      pos.strfcoord('%lath').should == 'N'
-      neg.strfcoord('%lath').should == 'S'
+    its_call(
+      %q{50 0' 16" N, 36 13' 53" E},
+      %q{%latd %latm' %lats" %lath, %lngd %lngm' %lngs" %lngh}
+    ) { is_expected.to ret coord(latd: 50, latm: 0, lats: 16, lngd: 36, lngm: 13, lngs: 53) }
 
-      pos.strfcoord('%lat').should == '%f' % pos.lat
-      neg.strfcoord('%lat').should == '%f' % neg.lat
+    its_call('50.004444', '%lat') { is_expected.to ret coord(lat: 50.004444, lng: 0) }
 
-      pos.strfcoord('%lngd').should == '36'
-      neg.strfcoord('%lngd').should == '36'
-      neg.strfcoord('%lngds').should == '-36'
+    its_call('36.231389', '%lng') { is_expected.to ret coord(lng: 36.231389) }
 
-      pos.strfcoord('%lngm').should == '13'
-      pos.strfcoord('%lngs').should == '53'
-      pos.strfcoord('%lngh').should == 'E'
-      neg.strfcoord('%lngh').should == 'W'
+    its_call('50.004444, 36.231389', '%lat; %lng') {
+      is_expected.to raise_error ArgumentError, /can't be parsed/
+    }
 
-      pos.strfcoord('%lng').should == '%f' % pos.lng
-      neg.strfcoord('%lng').should == '%f' % neg.lng
-    end
-
-    it 'understands flags and options' do
-      pos = Geo::Coord.new(50.004444, 36.231389)
-      neg = Geo::Coord.new(-50.004444, -36.231389)
-
-      pos.strfcoord('%+latds').should == '+50'
-      neg.strfcoord('%+latds').should == '-50'
-
-      pos.strfcoord('%.02lats').should == '%.02f' % pos.lats
-      pos.strfcoord('%.04lat').should == '%.04f' % pos.lat
-      pos.strfcoord('%+.04lat').should == '%+.04f' % pos.lat
-      pos.strfcoord('%+lat').should == '%+f' % pos.lat
-
-      pos.strfcoord('%+lngds').should == '+36'
-      neg.strfcoord('%+lngds').should == '-36'
-
-      pos.strfcoord('%.02lngs').should == '%.02f' % pos.lngs
-      pos.strfcoord('%.04lng').should == '%.04f' % pos.lng
-      pos.strfcoord('%+.04lng').should == '%+.04f' % pos.lng
-    end
-
-    it 'just leaves unknown parts' do
-      pos = Geo::Coord.new(50.004444, 36.231389)
-      pos.strfcoord('%latd %foo').should == '50 %foo'
-    end
-
-    it 'understands everyting at once' do
-      pos = Geo::Coord.new(50.004444, 36.231389)
-      pos.strfcoord(%q{%latd %latm' %lats" %lath, %lngd %lngm' %lngs" %lngh}).should ==
-        %q{50 0' 16" N, 36 13' 53" E}
-    end
-
-    it 'can carry' do
-      pos = Geo::Coord.new(0.033333, 91.333333)
-      pos.strfcoord('%latd %latm %lats, %lngd %lngm %lngs').should ==
-        '0 2 0, 91 20 0'
-      pos.strfcoord('%latd %latm %.02lats, %lngd %lngm %.02lngs').should ==
-        '0 2 0.00, 91 20 0.00'
-      pos.strfcoord('%latd %latm %.03lats, %lngd %lngm %.03lngs').should ==
-        '0 1 59.999, 91 19 59.999'
-    end
-  end
-
-  context :strpcoord do
-    it 'parses components' do
-      Geo::Coord.strpcoord('50.004444, 36.231389', '%lat, %lng').should ==
-        Geo::Coord.new(lat: 50.004444, lng: 36.231389)
-
-      Geo::Coord.strpcoord(
-        %q{50 0' 16" N, 36 13' 53" E},
-        %q{%latd %latm' %lats" %lath, %lngd %lngm' %lngs" %lngh}).should ==
-        Geo::Coord.new(latd: 50, latm: 0, lats: 16, lngd: 36, lngm: 13, lngs: 53)
-    end
-
-    it 'provides defaults' do
-      Geo::Coord.strpcoord('50.004444', '%lat').should ==
-        Geo::Coord.new(lat: 50.004444, lng: 0)
-
-      Geo::Coord.strpcoord('36.231389', '%lng').should ==
-        Geo::Coord.new(lng: 36.231389)
-    end
-
-    it 'raises on wrong format' do
-      lambda{Geo::Coord.strpcoord('50.004444, 36.231389', '%lat; %lng')}.should \
-        raise_error ArgumentError, /can't be parsed/
-    end
-
-    it 'ignores the rest' do
-      Geo::Coord.strpcoord('50.004444, 36.231389 is somewhere in Kharkiv', '%lat, %lng').should ==
-        Geo::Coord.new(lat: 50.004444, lng: 36.231389)
-    end
+    its_call('50.004444, 36.231389 is somewhere in Kharkiv', '%lat, %lng') {
+      is_expected.to ret coord(lat: 50.004444, lng: 36.231389)
+    }
   end
 end

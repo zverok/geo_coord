@@ -1,3 +1,5 @@
+require: rubocop-rspec
+
 AllCops:
   Include:
     - 'lib/**/*'
@@ -12,8 +14,11 @@ AllCops:
     - 'tmp/*'
     - '*.gemspec'
   DisplayCopNames: true
+  NewCops: enable
+  SuggestExtensions: false
+  TargetRubyVersion: 2.4
 
-Metrics/LineLength:
+Layout/LineLength:
   Max: 120
 
 Layout/SpaceInsideHashLiteralBraces:
@@ -24,6 +29,34 @@ Style/AndOr:
 
 Style/AsciiComments:
   Enabled: false
+
+# To add its_* methods
+Style/BlockDelimiters:
+  ProceduralMethods:
+  - benchmark
+  - bm
+  - bmbm
+  - create
+  - each_with_object
+  - measure
+  - new
+  - realtime
+  - tap
+  - with_object
+  FunctionalMethods:
+  - let
+  - let!
+  - subject
+  - watch
+  IgnoredMethods:
+  - lambda
+  - proc
+  - it
+  - its
+  - its_call
+  - its_map
+  AllowBracesOnProceduralOneLiners: false
+  BracesRequiredMethods: []
 
 Naming/AsciiIdentifiers:
   Enabled: false
@@ -53,3 +86,36 @@ Gemspec/OrderedDependencies:
 
 Style/FormatStringToken:
   Enabled: false
+
+Naming/MethodParameterName:
+  Enabled: false
+
+RSpec/ImplicitSubject:
+  Enabled: false
+
+RSpec/ImplicitBlockExpectation:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/NestedGroups:
+  Enabled: false
+
+RSpec/SharedExamples:
+  Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+
+RSpec/FilePath:
+  Enabled: false
+
+RSpec:
+  Language:
+    Includes:
+      Examples:
+        - its
+        - its_call
+        - its_map

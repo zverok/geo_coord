@@ -1,4 +1,7 @@
+# frozen_string_literal: true
+
 require 'bigdecimal'
+require 'bigdecimal/util'
 
 # Geo::Coord is Ruby's library for handling [lat, lng] pairs of
 # geographical coordinates. It provides most of basic functionality
@@ -141,44 +144,44 @@ module Geo
       end
 
       # @private
-      INT_PATTERN = '[-+]?\d+'.freeze # :nodoc:
+      INT_PATTERN = '[-+]?\d+' # :nodoc:
       # @private
-      UINT_PATTERN = '\d+'.freeze # :nodoc:
+      UINT_PATTERN = '\d+' # :nodoc:
       # @private
-      FLOAT_PATTERN = '[-+]?\d+(?:\.\d*)?'.freeze # :nodoc:
+      FLOAT_PATTERN = '[-+]?\d+(?:\.\d*)?' # :nodoc:
       # @private
-      UFLOAT_PATTERN = '\d+(?:\.\d*)?'.freeze # :nodoc:
+      UFLOAT_PATTERN = '\d+(?:\.\d*)?' # :nodoc:
 
       # @private
-      DEG_PATTERN = '[ °d]'.freeze # :nodoc:
+      DEG_PATTERN = '[ °d]' # :nodoc:
       # @private
-      MIN_PATTERN = "['′’m]".freeze # :nodoc:
+      MIN_PATTERN = "['′’m]" # :nodoc:
       # @private
-      SEC_PATTERN = '["″s]'.freeze # :nodoc:
+      SEC_PATTERN = '["″s]' # :nodoc:
 
       # @private
-      LL_PATTERN = /^(#{FLOAT_PATTERN})\s*[,; ]\s*(#{FLOAT_PATTERN})$/ # :nodoc:
+      LL_PATTERN = /^(#{FLOAT_PATTERN})\s*[,; ]\s*(#{FLOAT_PATTERN})$/.freeze # :nodoc:
 
       # @private
-      DMS_LATD_P = "(?<latd>#{INT_PATTERN})#{DEG_PATTERN}".freeze # :nodoc:
+      DMS_LATD_P = "(?<latd>#{INT_PATTERN})#{DEG_PATTERN}" # :nodoc:
       # @private
-      DMS_LATM_P = "(?<latm>#{UINT_PATTERN})#{MIN_PATTERN}".freeze # :nodoc:
+      DMS_LATM_P = "(?<latm>#{UINT_PATTERN})#{MIN_PATTERN}" # :nodoc:
       # @private
-      DMS_LATS_P = "(?<lats>#{UFLOAT_PATTERN})#{SEC_PATTERN}".freeze # :nodoc:
+      DMS_LATS_P = "(?<lats>#{UFLOAT_PATTERN})#{SEC_PATTERN}" # :nodoc:
       # @private
-      DMS_LAT_P = "#{DMS_LATD_P}\\s*#{DMS_LATM_P}\\s*#{DMS_LATS_P}\\s*(?<lath>[NS])".freeze # :nodoc:
+      DMS_LAT_P = "#{DMS_LATD_P}\\s*#{DMS_LATM_P}\\s*#{DMS_LATS_P}\\s*(?<lath>[NS])" # :nodoc:
 
       # @private
-      DMS_LNGD_P = "(?<lngd>#{INT_PATTERN})#{DEG_PATTERN}".freeze # :nodoc:
+      DMS_LNGD_P = "(?<lngd>#{INT_PATTERN})#{DEG_PATTERN}" # :nodoc:
       # @private
-      DMS_LNGM_P = "(?<lngm>#{UINT_PATTERN})#{MIN_PATTERN}".freeze # :nodoc:
+      DMS_LNGM_P = "(?<lngm>#{UINT_PATTERN})#{MIN_PATTERN}" # :nodoc:
       # @private
-      DMS_LNGS_P = "(?<lngs>#{UFLOAT_PATTERN})#{SEC_PATTERN}".freeze # :nodoc:
+      DMS_LNGS_P = "(?<lngs>#{UFLOAT_PATTERN})#{SEC_PATTERN}" # :nodoc:
       # @private
-      DMS_LNG_P = "#{DMS_LNGD_P}\\s*#{DMS_LNGM_P}\\s*#{DMS_LNGS_P}\\s*(?<lngh>[EW])".freeze # :nodoc:
+      DMS_LNG_P = "#{DMS_LNGD_P}\\s*#{DMS_LNGM_P}\\s*#{DMS_LNGS_P}\\s*(?<lngh>[EW])" # :nodoc:
 
       # @private
-      DMS_PATTERN = /^\s*#{DMS_LAT_P}\s*[,; ]\s*#{DMS_LNG_P}\s*$/x # :nodoc:
+      DMS_PATTERN = /^\s*#{DMS_LAT_P}\s*[,; ]\s*#{DMS_LNG_P}\s*$/x.freeze # :nodoc:
 
       # Parses Coord from string containing float latitude and longitude.
       # Understands several types of separators/spaces between values.
@@ -277,15 +280,17 @@ module Geo
         pattern = PARSE_PATTERNS.inject(pattern) do |memo, (pfrom, pto)|
           memo.gsub(pfrom, pto)
         end
-        match = Regexp.new('^' + pattern).match(str)
+        match = Regexp.new("^#{pattern}").match(str)
         raise ArgumentError, "Coordinates str #{str} can't be parsed by pattern #{pattern}" unless match
-        new(match.names.map { |n| [n.to_sym, _extract_match(match, n)] }.to_h)
+
+        new(**match.names.map { |n| [n.to_sym, _extract_match(match, n)] }.to_h)
       end
 
       private
 
       def _extract_match(match, name)
         return nil unless match[name]
+
         val = match[name]
         name.end_with?('h') ? val : val.to_f
       end
@@ -319,15 +324,19 @@ module Geo
     #    g = Geo::Coord.new(lat: 50.004444)
     #    # => #<Geo::Coord 50°0'16"N 0°0'0"W>
     #
-    def initialize(lat = nil, lng = nil, **opts)
+    def initialize(*args) # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
       @globe = Globes::Earth.instance
+      opts = args.pop if args.last.is_a?(Hash)
+
+      # It is probably can be clearer with Ruby 2.7+ pattern-matching... or with less permissive
+      # protocol :)
 
       case
-      when lat && lng
-        _init(lat, lng)
-      when opts.key?(:lat) || opts.key?(:lng)
+      when args.length == 2
+        _init(*args)
+      when args.empty? && opts && (opts.key?(:lat) || opts.key?(:lng))
         _init(opts[:lat], opts[:lng])
-      when opts.key?(:latd) || opts.key?(:lngd)
+      when args.empty? && opts && (opts.key?(:latd) || opts.key?(:lngd))
         _init_dms(opts)
       else
         raise ArgumentError, "Can't create #{self.class} by provided data"
@@ -363,7 +372,7 @@ module Geo
 
     # Returns latitude hemisphere (upcase letter 'N' or 'S').
     def lath
-      lat > 0 ? 'N' : 'S'
+      lat.positive? ? 'N' : 'S'
     end
 
     # Returns longitude degrees (unsigned integer).
@@ -383,7 +392,7 @@ module Geo
 
     # Returns longitude hemisphere (upcase letter 'E' or 'W').
     def lngh
-      lng > 0 ? 'E' : 'W'
+      lng.positive? ? 'E' : 'W'
     end
 
     # Returns latitude components: degrees, minutes, seconds and optionally
@@ -392,17 +401,17 @@ module Geo
     #    # Nothern hemisphere:
     #    g = Geo::Coord.new(50.004444, 36.231389)
     #
-    #    g.latdms        # => [50, 0, 15.9984, "N"]
-    #    g.latdms(true)  # => [50, 0, 15.9984]
+    #    g.latdms                     # => [50, 0, 15.9984, "N"]
+    #    g.latdms(hemisphere: false)  # => [50, 0, 15.9984]
     #
     #    # Southern hemisphere:
     #    g = Geo::Coord.new(-50.004444, 36.231389)
     #
-    #    g.latdms        # => [50, 0, 15.9984, "S"]
-    #    g.latdms(true)  # => [-50, 0, 15.9984]
+    #    g.latdms                     # => [50, 0, 15.9984, "S"]
+    #    g.latdms(hemisphere: false)  # => [-50, 0, 15.9984]
     #
-    def latdms(nohemisphere = false)
-      nohemisphere ? [latsign * latd, latm, lats] : [latd, latm, lats, lath]
+    def latdms(hemisphere: true)
+      hemisphere ? [latd, latm, lats, lath] : [latsign * latd, latm, lats]
     end
 
     # Returns longitude components: degrees, minutes, seconds and optionally
@@ -411,17 +420,17 @@ module Geo
     #    # Eastern hemisphere:
     #    g = Geo::Coord.new(50.004444, 36.231389)
     #
-    #    g.lngdms        # => [36, 13, 53.0004, "E"]
-    #    g.lngdms(true)  # => [36, 13, 53.0004]
+    #    g.lngdms                     # => [36, 13, 53.0004, "E"]
+    #    g.lngdms(hemisphere: false)  # => [36, 13, 53.0004]
     #
     #    # Western hemisphere:
     #    g = Geo::Coord.new(50.004444, 36.231389)
     #
-    #    g.lngdms        # => [36, 13, 53.0004, "E"]
-    #    g.lngdms(true)  # => [-36, 13, 53.0004]
+    #    g.lngdms                     # => [36, 13, 53.0004, "E"]
+    #    g.lngdms(hemisphere: false)  # => [-36, 13, 53.0004]
     #
-    def lngdms(nohemisphere = false)
-      nohemisphere ? [lngsign * lngd, lngm, lngs] : [lngd, lngm, lngs, lngh]
+    def lngdms(hemisphere: true)
+      hemisphere ? [lngd, lngm, lngs, lngh] : [lngsign * lngd, lngm, lngs]
     end
 
     # Latitude in radians. Geodesy formulae almost alwayse use greek Phi
@@ -488,11 +497,11 @@ module Geo
     end
 
     # @private
-    INTFLAGS = '\+'.freeze # :nodoc:
+    INTFLAGS = '\+' # :nodoc:
     # @private
-    FLOATUFLAGS = /\.0\d+/ # :nodoc:
+    FLOATUFLAGS = /\.0\d+/.freeze # :nodoc:
     # @private
-    FLOATFLAGS = /\+?#{FLOATUFLAGS}?/ # :nodoc:
+    FLOATFLAGS = /\+?#{FLOATUFLAGS}?/.freeze # :nodoc:
 
     # @private
     DIRECTIVES = { # :nodoc:
@@ -605,8 +614,8 @@ module Geo
 
     private
 
-    LAT_RANGE_ERROR = 'Expected latitude to be between -90 and 90, %p received'.freeze
-    LNG_RANGE_ERROR = 'Expected longitude to be between -180 and 180, %p received'.freeze
+    LAT_RANGE_ERROR = 'Expected latitude to be between -90 and 90, %p received'
+    LNG_RANGE_ERROR = 'Expected longitude to be between -180 and 180, %p received'
 
     def _init(lat, lng)
       lat = BigDecimal(lat.to_f, 10)
@@ -628,18 +637,19 @@ module Geo
       lat = (
         opts[:latd].to_i +
         opts[:latm].to_i / 60.0 +
-        opts[:lats].to_i / 3600.0
+        opts[:lats].to_d / 3600.0
       ) * guess_sign(opts[:lath], LATH)
       lng = (
         opts[:lngd].to_i +
         opts[:lngm].to_i / 60.0 +
-        opts[:lngs].to_i / 3600.0
+        opts[:lngs].to_d / 3600.0
       ) * guess_sign(opts[:lngh], LNGH)
       _init(lat, lng)
     end
 
     def guess_sign(h, hemishperes)
       return 1 unless h
+
       hemishperes[h] or
         raise ArgumentError, "Unidentified hemisphere: #{h}"
     end
@@ -647,6 +657,7 @@ module Geo
     def guard_seconds(pattern, result)
       m = pattern.match(/<(lat|lng)s>/)
       return result unless m && result.start_with?('60')
+
       carry = "#{m[1]}m".to_sym
       [pattern % {lats: 0, lngs: 0}, carry]
     end

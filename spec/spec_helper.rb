@@ -2,6 +2,8 @@ if Object.const_defined?(:RSpec) # otherwise it is mspec
   require 'stringio'
   require 'simplecov'
   require 'coveralls'
+  require 'rspec/its'
+  require 'saharspec'
 
   Coveralls.wear!
 

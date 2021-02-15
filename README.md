@@ -36,13 +36,13 @@ other projects.
 You can read my initial proposal [here](https://github.com/zverok/geo_coord/blob/master/StdlibProposal.md)
 and discussion in Ruby tracker [there](https://bugs.ruby-lang.org/issues/12361).
 
-I still have a small hope it would be part of stdlib once, that's why I
+~~I still have a small hope it would be part of stdlib once, that's why I
 preserve the style of specs (outdated rspec, but compatible with mspec used
-for standard library) and docs (yard in RDoc-compatibility mode).
+for standard library) and docs (yard in RDoc-compatibility mode).~~
 
 ## Installation
 
-Now when it is a gem, just do your usual `gem install geo_coord` or add
+As usual: `gem install geo_coord` or add
 `gem "geo_coord", require: "geo/coord"` to your Gemfile.
 
 ## Usage
@@ -178,7 +178,7 @@ metres for distances (as they are SI unit) and degrees for azimuth.
 Latitude and longitude are stored in degrees, but radians values accessors
 are provided (being widely used in geodesy math).
 
-**Internal storage**: Since ver 0.0.2, latitude and longitude stored
+**Internal storage**: Since ver 0.1.0, latitude and longitude stored
 internally as an instances of `BigDecimal`. While having some memory
 and performance downsides, this datatype provides _correctness_ of
 conversions between floating point & deg-min-sec representations:
