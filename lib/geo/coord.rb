@@ -324,32 +324,28 @@ module Geo
     #    g = Geo::Coord.new(lat: 50.004444)
     #    # => #<Geo::Coord 50°0'16"N 0°0'0"W>
     #
-    def initialize(*args) # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
+    def initialize(lat = nil, lng = nil, **kwargs) # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
       @globe = Globes::Earth.instance
-      opts = args.pop if args.last.is_a?(Hash)
 
       # It is probably can be clearer with Ruby 2.7+ pattern-matching... or with less permissive
       # protocol :)
+      kwargs = lat if lat.is_a?(Hash) && kwargs.empty? # Ruby 3.0
 
       case
-      when args.length == 2
-        _init(*args)
-      when args.empty? && opts && (opts.key?(:lat) || opts.key?(:lng))
-        _init(opts[:lat], opts[:lng])
-      when args.empty? && opts && (opts.key?(:latd) || opts.key?(:lngd))
-        _init_dms(opts)
+      when lat && lng
+        _init(lat, lng)
+      when kwargs.key?(:lat) || kwargs.key?(:lng)
+        _init(*kwargs.values_at(:lat, :lng))
+      when kwargs.key?(:latd) || kwargs.key?(:lngd)
+        _init_dms(**kwargs)
       else
-        raise ArgumentError, "Can't create #{self.class} by provided data"
+        raise ArgumentError, "Can't create #{self.class} by provided data: (#{lat}, #{lng}, **#{kwargs}"
       end
     end
 
     # Compares with +other+.
     #
-    # Note, that comparison includes comparing floating point values,
-    # so, when two "almost exactly same" coord pairs are calculated using
-    # different methods, you can rarely expect them to be _exactly_ equal.
-    #
-    # Also, note that no greater/lower relation is defined on Coord, so,
+    # Note that no greater/lower relation is defined on Coord, so,
     # for example, you can't just sort an array of Coord.
     def ==(other)
       other.is_a?(self.class) && other.lat == lat && other.lng == lng
@@ -633,17 +629,10 @@ module Geo
     # @private
     LNGH = {'E' => 1, 'W' => -1}.freeze # :nodoc:
 
-    def _init_dms(opts) # rubocop:disable Metrics/AbcSize
-      lat = (
-        opts[:latd].to_i +
-        opts[:latm].to_i / 60.0 +
-        opts[:lats].to_d / 3600.0
-      ) * guess_sign(opts[:lath], LATH)
-      lng = (
-        opts[:lngd].to_i +
-        opts[:lngm].to_i / 60.0 +
-        opts[:lngs].to_d / 3600.0
-      ) * guess_sign(opts[:lngh], LNGH)
+    def _init_dms(latd: 0, latm: 0, lats: 0, lath: nil, lngd: 0, lngm: 0, lngs: 0, lngh: nil) # rubocop:disable Metrics/AbcSize
+      lat = (latd.to_d + latm.to_d / 60 + lats.to_d / 3600) * guess_sign(lath, LATH)
+      lng = (lngd.to_d + lngm.to_d / 60 + lngs.to_d / 3600) * guess_sign(lngh, LNGH)
+
       _init(lat, lng)
     end
 

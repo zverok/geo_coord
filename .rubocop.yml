@@ -30,6 +30,9 @@ Style/AndOr:
 Style/AsciiComments:
   Enabled: false
 
+Metrics/ParameterLists:
+  CountKeywordArgs: false
+
 # To add its_* methods
 Style/BlockDelimiters:
   ProceduralMethods:
