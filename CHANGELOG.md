@@ -6,6 +6,7 @@
 * Drop compatibility checks for Ruby < 2.4
 * Update specs to modern style (no hope to make it to standard library after 5 years :shrug:)
 * Fix seconds fraction truncation in DMS-initialization (@matthew-angelswing)
+* Change positional `hemisphere` argument in `to_s` to keyword for clarity
 
 ## 0.1.0 - Feb 3, 2018
 
